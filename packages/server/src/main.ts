@@ -1,8 +1,27 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import { VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
+  const fastify = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter(),
+  );
+
+  fastify.setGlobalPrefix('/api');
+  fastify.enableVersioning({
+    type: VersioningType.URI,
+  });
+
+  const port = process.env.PORT;
+
+  await fastify.listen(port, (err, address) => {
+    console.log(`Server is Running: ${address}`);
+  });
 }
+
 bootstrap();
