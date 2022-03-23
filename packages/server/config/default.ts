@@ -5,5 +5,9 @@ export const config = {
     clientHost: 'http://localhost:3000',
     apiHost: 'http://localhost:5000',
   },
+  telegram: {
+    token: '',
+    roomId: '',
+  },
   financialAPIKey: '',
 };
