@@ -7,7 +7,7 @@ export const config = {
   },
   telegram: {
     token: '',
-    roomId: '',
+    chatId: '',
   },
   financeAPIKey: '',
 };

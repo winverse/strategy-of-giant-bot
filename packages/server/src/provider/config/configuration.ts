@@ -9,6 +9,10 @@ function configValidator(config: Config) {
       clientHost: Joi.string().required(),
       apiHost: Joi.string().required(),
     }),
+    telegram: Joi.object().keys({
+      token: Joi.string().required(),
+      chatId: Joi.string().required(),
+    }),
     financeApiKey: Joi.string().required(),
   });
 

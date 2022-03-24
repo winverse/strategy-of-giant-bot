@@ -4,6 +4,7 @@ import { LoggerModule } from '@provider/logger';
 import { configuration } from 'src/provider/config/configuration';
 import { ConfigModule } from './provider/config/config.module';
 import { FinanceApiModule } from './provider/finance-api/finance-api.module';
+import { AssetsModule } from './module/assets/assets.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { FinanceApiModule } from './provider/finance-api/finance-api.module';
     ConfigModule,
     LoggerModule,
     FinanceApiModule,
+    AssetsModule,
   ],
   controllers: [],
   providers: [],
