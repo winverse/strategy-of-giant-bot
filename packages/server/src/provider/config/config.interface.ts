@@ -7,5 +7,5 @@ export interface AppConfig {
 
 export interface Config {
   app: AppConfig;
-  financialApiKey: string;
+  financeApiKey: string;
 }

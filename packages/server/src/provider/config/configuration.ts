@@ -9,7 +9,7 @@ function configValidator(config: Config) {
       clientHost: Joi.string().required(),
       apiHost: Joi.string().required(),
     }),
-    financialApiKey: Joi.string().required(),
+    financeApiKey: Joi.string().required(),
   });
 
   const { error } = schema.validate(config);

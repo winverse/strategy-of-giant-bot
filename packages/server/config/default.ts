@@ -9,5 +9,5 @@ export const config = {
     token: '',
     roomId: '',
   },
-  financialAPIKey: '',
+  financeAPIKey: '',
 };
