@@ -11,7 +11,6 @@ export class FinanceApiService {
     const client = axios.create({
       baseURL: 'https://financialmodelingprep.com',
     });
-    console.log(this.config.get('financeApiKey'));
     client.interceptors.request.use((config) => {
       config.params = {
         ...(config.params || {}),
@@ -23,21 +22,10 @@ export class FinanceApiService {
   }
   public async getHistoricalPrice(ticker: string) {
     try {
-      const now = new Date();
-      const to = format(now, 'yyyy-MM-dd');
-      const from = subYears(now, 1);
-      const duration = {
-        from,
-        to,
-      };
-
       const client = this.client();
 
       const { data } = await client.get<GetHistoricalPriceData>(
         `/api/v3/historical-price-full/${ticker}`,
-        {
-          params: duration,
-        },
       );
 
       return data.historical;
