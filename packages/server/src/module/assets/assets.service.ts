@@ -19,6 +19,7 @@ export class AssetsService {
     const { offense } = daaTickers;
     const testTicker = offense[0];
 
+    // const result =
     await this.rawHistoricalPrices(testTicker);
     return 'Momentum';
   }
