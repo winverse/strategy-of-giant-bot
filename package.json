@@ -5,6 +5,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "server:dev": "yarn workspace server start:dev"
+  },
   "dependencies": {
     "date-fns": "^2.28.0",
     "winston": "^3.6.0",

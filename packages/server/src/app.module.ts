@@ -5,6 +5,7 @@ import { configuration } from 'src/provider/config/configuration';
 import { ConfigModule } from './provider/config/config.module';
 import { FinanceApiModule } from './provider/finance-api/finance-api.module';
 import { AssetsModule } from './module/assets/assets.module';
+import { UtilsModule } from './provider/utils/utils.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AssetsModule } from './module/assets/assets.module';
     LoggerModule,
     FinanceApiModule,
     AssetsModule,
+    UtilsModule,
   ],
   controllers: [],
   providers: [],

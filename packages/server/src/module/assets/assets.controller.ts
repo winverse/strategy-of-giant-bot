@@ -10,6 +10,6 @@ export class AssetsController {
   constructor(private assetsService: AssetsService) {}
   @Get('/')
   async getMomentumScore(@Query('strategy') strategy: AssetsStrategy) {
-    return await this.assetsService.getMomentumScore(strategy);
+    return await this.assetsService.getmomentumScoreByStretegy(strategy);
   }
 }
