@@ -24,7 +24,7 @@ export const tickerListByStrategy = <T extends AssetsStrategy>(
       deffense: ['SHY', 'IEF', 'LQD'],
     },
     DAA: {
-      canary: ['BND', 'VWO', 'KOSPI'],
+      canary: ['BND', 'VWO'],
       offense: [
         'SPY',
         'IWM',

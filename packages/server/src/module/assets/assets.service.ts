@@ -1,4 +1,4 @@
-import { tickerListByStrategy } from '@common/helper/ticker-list-by-starategy';
+import { tickerListByStrategy } from '@common/helper';
 import {
   AssetsStrategy,
   SectionalOutline,
@@ -102,13 +102,16 @@ export class AssetsService {
   async getMomentunScoreByTicker(ticker: string) {
     try {
       const rawData = await this.getRawHistoricalPrices(ticker);
+
       const rawDataBySection = await this.getDataBySection(rawData);
 
       const outline = this.sectionalOutline(rawDataBySection);
+
       const totalMomentumScore: number = outline.reduce(
         (acc, cur) => acc + cur.adjMargin,
         0,
       );
+
       return {
         ticker,
         outline,
@@ -130,10 +133,11 @@ export class AssetsService {
         Object.entries(tickersByStrategy).map(async ([key, tickers]) => {
           const data = [];
           for (const ticker of tickers) {
-            await this.utils.sleep(800);
+            await this.utils.sleep(700);
             const outline = await this.getMomentunScoreByTicker(ticker);
             data.push(outline);
           }
+
           return {
             group: key,
             data,
