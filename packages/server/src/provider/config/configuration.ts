@@ -13,6 +13,14 @@ function configValidator(config: Config) {
       token: Joi.string().required(),
       chatId: Joi.string().required(),
     }),
+    database: Joi.object().keys({
+      provider: Joi.string().required(),
+      host: Joi.string().required(),
+      database: Joi.string().required(),
+      port: Joi.string().required(),
+      userName: Joi.string().required(),
+      password: Joi.string().allow('').required(),
+    }),
     financeApiKey: Joi.string().required(),
   });
 

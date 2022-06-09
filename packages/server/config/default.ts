@@ -9,5 +9,13 @@ export const config = {
     token: '',
     chatId: '',
   },
+  database: {
+    provider: '',
+    host: '',
+    database: '',
+    port: '',
+    userName: '',
+    password: '',
+  },
   financeAPIKey: '',
 };

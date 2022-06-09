@@ -20,11 +20,20 @@ class WriteEnv {
 
     const { config }: { config: Config } = await import(configFilePath);
 
+    const { provider, userName, password, host, database, port } =
+      config.database;
+
     // write env
     const { app } = config;
 
+    const databaseUrl = `${provider}://${userName}:${password}@${host}:${port}/${database}?schema=public`;
     const envFilePath = path.resolve(process.cwd(), `.env`);
-    await fs.writeFileSync(envFilePath, `PORT=${app.port}`);
+    await fs.writeFileSync(
+      envFilePath,
+      `PORT=${app.port}
+       DATABASE_URL=${databaseUrl}
+    `.replace(/ /gi, ''),
+    );
   }
 }
 

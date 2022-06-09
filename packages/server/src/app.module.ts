@@ -6,6 +6,7 @@ import { ConfigModule } from './provider/config/config.module';
 import { FinanceApiModule } from './provider/finance-api/finance-api.module';
 import { AssetsModule } from './module/assets/assets.module';
 import { UtilsModule } from './provider/utils/utils.module';
+import { PrismaModule } from './provider/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -15,8 +16,8 @@ import { UtilsModule } from './provider/utils/utils.module';
     FinanceApiModule,
     AssetsModule,
     UtilsModule,
+    PrismaModule,
   ],
-  controllers: [],
   providers: [],
 })
 export class AppModule {}

@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { FinanceApiService } from '@provider/finance-api';
 import { RawHistoricalPrice } from '@provider/finance-api/finance-api.interface';
+import { PrismaService } from '@provider/prisma';
 import { UtilsService } from '@provider/utils';
 import { subDays, format, subMonths } from 'date-fns';
 import { BAD_REQUEST } from 'src/constants/errors/errors.contants';
@@ -18,6 +19,7 @@ export class AssetsService {
   constructor(
     private financeApi: FinanceApiService,
     private utils: UtilsService,
+    private prisma: PrismaService,
   ) {}
   private async getRawHistoricalPrices(
     ticker: string,
@@ -26,7 +28,27 @@ export class AssetsService {
       // Compare today's date and ticker
       // return the DB save value if there is a value in the database.
 
+      const today = format(new Date(), 'yy-MM-dd');
+
+      const exists = await this.prisma.rawData.findFirst({
+        where: {
+          date: today,
+          ticker,
+        },
+      });
+
+      if (exists) return exists.raw as any;
+
       const rawData = await this.financeApi.getHistoricalPrice(ticker);
+
+      await this.prisma.rawData.create({
+        data: {
+          date: today,
+          ticker,
+          raw: rawData as any,
+        },
+      });
+
       return rawData;
     } catch (error) {
       throw new InternalServerErrorException(error);

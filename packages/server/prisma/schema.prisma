@@ -1,0 +1,15 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model RawData {
+  id     String @id @default(cuid())
+  raw    Json[] @db.JsonB
+  ticker String @db.VarChar(20)
+  date   String @db.VarChar(10)
+}
