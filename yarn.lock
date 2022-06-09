@@ -1169,6 +1169,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@prisma/client@npm:^3.15.0":
+  version: 3.15.0
+  resolution: "@prisma/client@npm:3.15.0"
+  dependencies:
+    "@prisma/engines-version": 3.15.0-29.b9297dc3a59307060c1c39d7e4f5765066f38372
+  peerDependencies:
+    prisma: "*"
+  peerDependenciesMeta:
+    prisma:
+      optional: true
+  checksum: c1ecc67c5edd54b8df8df1d73e32236f2cb5567ad5d5b74ac5ef63cb8875daa249340e1278abd5e4dfe01a8fd16a91c487b3eb96bfa463fdf01e100285182871
+  languageName: node
+  linkType: hard
+
+"@prisma/engines-version@npm:3.15.0-29.b9297dc3a59307060c1c39d7e4f5765066f38372":
+  version: 3.15.0-29.b9297dc3a59307060c1c39d7e4f5765066f38372
+  resolution: "@prisma/engines-version@npm:3.15.0-29.b9297dc3a59307060c1c39d7e4f5765066f38372"
+  checksum: 73689e151d5d5353dc003166be6e113eb204d8e3b0c88931bed28616db609ad1867be7ddc5ddfd6ee23001ea3042e17125bd3aba1307e85bdf572558c1baeff3
+  languageName: node
+  linkType: hard
+
 "@rushstack/eslint-patch@npm:^1.0.8":
   version: 1.1.1
   resolution: "@rushstack/eslint-patch@npm:1.1.1"
@@ -7511,6 +7532,7 @@ __metadata:
     "@nestjs/platform-fastify": ^8.4.2
     "@nestjs/schematics": ^8.0.0
     "@nestjs/testing": ^8.0.0
+    "@prisma/client": ^3.15.0
     "@types/express": ^4.17.13
     "@types/jest": 27.4.1
     "@types/node": ^16.0.0

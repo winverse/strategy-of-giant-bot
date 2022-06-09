@@ -9,7 +9,7 @@
 - 안전자산: SHY(미국단기채), IEF(중기채), LQD(회사채)
 - 4개의 공격자산중 모멘텀 스코어가 가장 높은 1개 자산을 산다
 - 4개의 공격 자산 중 하나라도 모멘텀스코어가 -면 안전자산으로
-- -(Minus)가 나오면 3개의 안전 자산중 모멘텀 스코어가 가장 높은 자산을 산다.
+- 안전 자산중 모멘텀 스코어가 가장 높은 자산을 산다.
 
 ## [DAA Strategy](https://allocatesmartly.com/ilya-kipnis-defensive-adaptive-asset-allocation/)
 
@@ -17,7 +17,7 @@
 - 공격 자산: SPY(S&P500), IWM(러셀 2000), QQQ(나스닥), VGK(유럽), EWJ(일본), VWO(개도국), VNQ(리츠), GSG(원자재), GLD(금), TLT(미국 장기채), HYG(하이일드채권), LQD(회사채)
 - 안전 자산: SHY(미국단기채), IEF(미국중기채), LQD(회사채)
 - 12개 공격 자산, 모멘텀스코어가 제일 높은 6개의 자산을 삽니다.
-- 카나리아 자산으로 공격형 자산 비중 결정(3+: 100%, 2+: 66%, 1+: 33%, 0: 0%);
+- 카나리아 자산으로 공격형 자산 비중 결정(2: 100%, 1: 50%, 0: 0%);
 
 ## [Momentum score](https://ycharts.com/glossary/terms/momentum_fractile)
 
