@@ -41,13 +41,15 @@ export class AssetsService {
 
       const rawData = await this.financeApi.getHistoricalPrice(ticker);
 
-      await this.prisma.rawData.create({
-        data: {
-          date: today,
-          ticker,
-          raw: rawData as any,
-        },
-      });
+      if (rawData) {
+        await this.prisma.rawData.create({
+          data: {
+            date: today,
+            ticker,
+            raw: rawData as any,
+          },
+        });
+      }
 
       return rawData;
     } catch (error) {
