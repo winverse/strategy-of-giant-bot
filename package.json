@@ -5,7 +5,9 @@
     "packages/*"
   ],
   "scripts": {
-    "server:dev": "yarn workspace server start:dev"
+    "server:dev": "yarn workspace server start:dev",
+    "prisma:generate": "yarn workspace server prisma:generate",
+    "prisma:push": "yarn workspace server prisma:push"
   },
   "dependencies": {
     "date-fns": "^2.28.0",
