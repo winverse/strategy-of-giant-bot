@@ -1,4 +1,3 @@
-import { mode } from '@common/helper';
 import {
   ArgumentsHost,
   Catch,
@@ -8,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { BotService } from '@provider/bot';
 import { LoggerService } from '@provider/logger';
+import { UtilsService } from '@provider/utils';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @Catch()
@@ -15,6 +15,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   constructor(
     private readonly logger: LoggerService,
     private readonly bot: BotService,
+    private readonly utils: UtilsService,
   ) {}
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp(); // basic
@@ -40,7 +41,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         query: ${JSON.stringify(Object.assign({}, request.query), null, 4)}
       `;
 
-      if (mode.isProd) {
+      if (this.utils.mode.isProd) {
         this.bot.telegramSendMessage(log);
         this.logger.error(exception);
       }

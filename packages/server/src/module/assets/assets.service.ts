@@ -1,4 +1,3 @@
-import { tickerListByStrategy } from '@common/helper';
 import {
   AssetsStrategy,
   SectionalOutline,
@@ -11,15 +10,17 @@ import {
 import { FinanceApiService } from '@provider/finance-api';
 import { RawHistoricalPrice } from '@provider/finance-api/finance-api.interface';
 import { PrismaService } from '@provider/prisma';
+import { TickerService } from '@provider/ticker/ticker.service';
 import { UtilsService } from '@provider/utils';
 import { subDays, format, subMonths } from 'date-fns';
 import { BAD_REQUEST } from 'src/constants/errors/errors.contants';
 @Injectable()
 export class AssetsService {
   constructor(
-    private financeApi: FinanceApiService,
-    private utils: UtilsService,
-    private prisma: PrismaService,
+    private readonly financeApi: FinanceApiService,
+    private readonly utils: UtilsService,
+    private readonly prisma: PrismaService,
+    private readonly tickerService: TickerService,
   ) {}
   private async getRawHistoricalPrices(
     ticker: string,
@@ -151,7 +152,8 @@ export class AssetsService {
         throw new BadRequestException(BAD_REQUEST);
       }
 
-      const tickersByStrategy = tickerListByStrategy(strategy);
+      const tickersByStrategy =
+        this.tickerService.getTickersByStrategy(strategy);
 
       const result = await Promise.all(
         Object.entries(tickersByStrategy).map(async ([key, tickers]) => {
