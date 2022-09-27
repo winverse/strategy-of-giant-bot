@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model RawData {
+model Tickers {
   id     String @id @default(cuid())
   raw    Json[] @db.JsonB
   ticker String @db.VarChar(20)

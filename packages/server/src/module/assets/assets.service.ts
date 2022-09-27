@@ -9,50 +9,42 @@ import {
 } from '@nestjs/common';
 import { FinanceApiService } from '@provider/finance-api';
 import { RawHistoricalPrice } from '@provider/finance-api/finance-api.interface';
-import { PrismaService } from '@provider/prisma';
-import { TickerService } from '@provider/ticker/ticker.service';
+import { TickersService } from '@module/tickers/tickers.service';
 import { UtilsService } from '@provider/utils';
 import { subDays, format, subMonths } from 'date-fns';
 import { BAD_REQUEST } from 'src/constants/errors/errors.contants';
+
 @Injectable()
 export class AssetsService {
   constructor(
     private readonly financeApi: FinanceApiService,
     private readonly utils: UtilsService,
-    private readonly prisma: PrismaService,
-    private readonly tickerService: TickerService,
+    private readonly tickersService: TickersService,
   ) {}
   private async getRawHistoricalPrices(
     ticker: string,
+    today: string,
   ): Promise<RawHistoricalPrice[]> {
     try {
       // Compare today's date and ticker
       // return the DB save value if there is a value in the database.
-
-      const today = format(new Date(), 'yy-MM-dd');
-
-      const exists = await this.prisma.rawData.findFirst({
-        where: {
-          date: today,
-          ticker,
-        },
+      const existsTicker = await this.tickersService.findByTicker(ticker, {
+        date: today,
       });
 
-      if (exists) return exists.raw as any;
+      if (existsTicker) return existsTicker.raw as any;
 
-      const rawData = await this.financeApi.getHistoricalPrice(ticker);
+      const tickerData = await this.financeApi.getHistoricalPrice(ticker);
 
-      if (rawData) {
-        await this.prisma.rawData.create({
-          data: {
-            date: today,
-            ticker,
-            raw: rawData as any,
-          },
+      if (tickerData) {
+        await this.tickersService.create({
+          date: today,
+          ticker,
+          raw: tickerData as any,
         });
       }
 
-      return rawData;
+      return tickerData;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -64,6 +56,7 @@ export class AssetsService {
       if (!rawData) {
         throw new Error('Failed load raw data from fmp');
       }
+
       const yesterday = subDays(new Date(), 1);
       // load quarterly data
       const sectionDate = [0, 1, 3, 6, 12].map((section) =>
@@ -72,21 +65,20 @@ export class AssetsService {
 
       const rawdataByDate = sectionDate.map((date) => {
         let data = null;
-        let amount = 0;
+        const amount = 0;
         while (!data) {
           const adjDate = subDays(date, amount);
           const formattedDate = format(adjDate, 'yyyy-MM-dd');
           data = rawData.find((raw) => raw.date === formattedDate);
           // prevent from infinity loop, fmp free price api provider anuual data
-          if (amount > 10) {
-            return rawData[rawData.length - 1];
-          }
+
           if (!data) {
-            amount++;
+            return rawData[rawData.length - 1];
           }
         }
         return data;
       });
+
       return rawdataByDate;
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -101,20 +93,24 @@ export class AssetsService {
         const returnComparedToYesterday =
           (yesterdayOutline.close / cur.close) * 100 - 100;
 
-        const rateOfRetrun = Number(returnComparedToYesterday.toFixed(2));
-        const adjIndex = {
+        const rateOfRetrun = this.utils.twoDecimalPoint(
+          returnComparedToYesterday,
+        );
+
+        const adjIndex: Record<number, number> = {
           1: 12,
           2: 4,
           3: 2,
           4: 1,
         };
+
         const constant = adjIndex[index];
 
         const outline = {
           to: yesterdayOutline.date,
           from: cur.date,
           rateOfRetrun: `${rateOfRetrun}%`,
-          adjMargin: Number((rateOfRetrun * constant).toFixed(2)),
+          adjMargin: this.utils.twoDecimalPoint(rateOfRetrun * constant), // Momentum을 이용하기 위한 조정 값
         };
 
         acc.push(outline);
@@ -124,54 +120,52 @@ export class AssetsService {
       throw new InternalServerErrorException(error);
     }
   }
-  async getMomentunScoreByTicker(ticker: string) {
+  async getMomentumScoreByTicker(ticker: string) {
+    await this.utils.sleep(200);
     try {
-      const rawData = await this.getRawHistoricalPrices(ticker);
-
+      const today = format(new Date(), 'yy-MM-dd');
+      const rawData = await this.getRawHistoricalPrices(ticker, today);
       const rawDataBySection = await this.getDataBySection(rawData);
-
       const outline = this.sectionalOutline(rawDataBySection);
 
-      const totalMomentumScore: number = outline.reduce(
-        (acc, cur) => acc + cur.adjMargin,
-        0,
-      );
+      const totalMomentumScore = outline
+        .map((data) => data.adjMargin)
+        .reduce(this.utils.sum);
 
       return {
         ticker,
         outline,
-        totalMomentumScore: Number(totalMomentumScore.toFixed(2)),
+        totalMomentumScore: this.utils.twoDecimalPoint(totalMomentumScore),
       };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-  async getmomentumScoreByStretegy(strategy: AssetsStrategy) {
+  async getMomentumScoreByStretegy(strategy: AssetsStrategy) {
     try {
       if (!['DAA', 'VAA'].includes(strategy)) {
         throw new BadRequestException(BAD_REQUEST);
       }
 
       const tickersByStrategy =
-        this.tickerService.getTickersByStrategy(strategy);
+        this.tickersService.getTickersByStrategy(strategy);
 
-      const result = await Promise.all(
-        Object.entries(tickersByStrategy).map(async ([key, tickers]) => {
-          const data = [];
-          for (const ticker of tickers) {
-            await this.utils.sleep(700);
-            const outline = await this.getMomentunScoreByTicker(ticker);
-            data.push(outline);
-          }
+      const tickerByGroup = Object.entries(tickersByStrategy).map(
+        ([key, tickers]) => ({ group: key, tickers }),
+      );
 
+      return await Promise.all(
+        tickerByGroup.flatMap(async ({ group, tickers }) => {
           return {
-            group: key,
-            data,
+            group,
+            data: await Promise.all(
+              tickers.map(
+                async (ticker) => await this.getMomentumScoreByTicker(ticker),
+              ),
+            ),
           };
         }),
       );
-
-      return result;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

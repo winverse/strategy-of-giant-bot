@@ -13,4 +13,10 @@ export class UtilsService {
   sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
+  sum(a: number, b: number) {
+    return a + b;
+  }
+  twoDecimalPoint(x: number): number {
+    return Number(x.toFixed(2));
+  }
 }

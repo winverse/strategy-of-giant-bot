@@ -9,7 +9,7 @@ interface DAATickers extends VAATickers {
   canary: string[];
 }
 
-export type TickerListTypeGuard<T extends AssetsStrategy> = T extends 'VAA'
+export type TickersTypeGuard<T extends AssetsStrategy> = T extends 'VAA'
   ? VAATickers
   : T extends 'DAA'
   ? DAATickers

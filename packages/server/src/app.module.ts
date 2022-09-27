@@ -10,8 +10,7 @@ import { PrismaModule } from './provider/prisma/prisma.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from '@common/filters';
 import { BotModule } from '@provider/bot';
-import { TickerService } from './provider/ticker/ticker.service';
-import { TickerModule } from './provider/ticker/ticker.module';
+import { TickersModule } from './module/tickers/tickers.module';
 
 @Module({
   imports: [
@@ -23,14 +22,13 @@ import { TickerModule } from './provider/ticker/ticker.module';
     UtilsModule,
     PrismaModule,
     BotModule,
-    TickerModule,
+    TickersModule,
   ],
   providers: [
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
-    TickerService,
   ],
 })
 export class AppModule {}
