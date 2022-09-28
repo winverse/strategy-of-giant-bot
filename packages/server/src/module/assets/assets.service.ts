@@ -1,6 +1,6 @@
 import {
   AssetsStrategy,
-  SectionalOutline,
+  QuarterlyOutline,
 } from '@module/assets/assets.interface';
 import {
   BadRequestException,
@@ -26,14 +26,13 @@ export class AssetsService {
     today: string,
   ): Promise<RawHistoricalPrice[]> {
     try {
-      // Compare today's date and ticker
-      // return the DB save value if there is a value in the database.
       const existsTicker = await this.tickersService.findByTicker(ticker, {
         date: today,
       });
 
       if (existsTicker) return existsTicker.raw as any;
 
+      await this.utils.sleep(300); // for free tier fmp server
       const tickerData = await this.financeApi.getHistoricalPrice(ticker);
 
       if (tickerData) {
@@ -49,68 +48,80 @@ export class AssetsService {
       throw new InternalServerErrorException(error);
     }
   }
-  private getDataBySection(
+  private getRawDataByQuarterlyDate(
+    rawData: RawHistoricalPrice[],
+  ): RawHistoricalPrice[] {
+    const yesterday = subDays(new Date(), 1);
+
+    const quarterlyBaseDate = {
+      now: 0,
+      monthAgo: 1,
+      threeMonthsAgo: 3,
+      sixMonthsAgo: 6,
+      yearAgo: 12,
+    };
+
+    return Object.values(quarterlyBaseDate)
+      .map((quarter) => subMonths(yesterday, quarter))
+      .map((date) => {
+        let data = null;
+        let diff = 0;
+        while (!data) {
+          const adjDate = subDays(date, diff);
+          const formattedDate = format(adjDate, 'yyyy-MM-dd');
+          data = rawData.find((raw) => raw.date === formattedDate);
+          if (diff > 10) {
+            return rawData[rawData.length - 1];
+          }
+
+          if (!data) {
+            diff++;
+          }
+        }
+        return data;
+      });
+  }
+  private classifyRawDataByQuarterly(
     rawData?: RawHistoricalPrice[],
   ): RawHistoricalPrice[] {
     try {
       if (!rawData) {
         throw new Error('Failed load raw data from fmp');
       }
-
-      const yesterday = subDays(new Date(), 1);
       // load quarterly data
-      const sectionDate = [0, 1, 3, 6, 12].map((section) =>
-        subMonths(yesterday, section),
-      );
-
-      const rawdataByDate = sectionDate.map((date) => {
-        let data = null;
-        const amount = 0;
-        while (!data) {
-          const adjDate = subDays(date, amount);
-          const formattedDate = format(adjDate, 'yyyy-MM-dd');
-          data = rawData.find((raw) => raw.date === formattedDate);
-          // prevent from infinity loop, fmp free price api provider anuual data
-
-          if (!data) {
-            return rawData[rawData.length - 1];
-          }
-        }
-        return data;
-      });
-
-      return rawdataByDate;
+      return this.getRawDataByQuarterlyDate(rawData);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-  private sectionalOutline(rawData: RawHistoricalPrice[]): SectionalOutline[] {
+  private quarterlyOutline(rawData: RawHistoricalPrice[]): QuarterlyOutline[] {
     try {
       return rawData.reduce((acc, cur, index, origin) => {
         if (index === 0) return acc;
-        const yesterdayOutline = origin[0];
+        const yesterdayOverview = origin[0];
 
-        const returnComparedToYesterday =
-          (yesterdayOutline.close / cur.close) * 100 - 100;
+        const returnComparedWithYesterday =
+          (yesterdayOverview.close / cur.close) * 100 - 100;
 
         const rateOfRetrun = this.utils.twoDecimalPoint(
-          returnComparedToYesterday,
+          returnComparedWithYesterday,
         );
 
-        const adjIndex: Record<number, number> = {
-          1: 12,
-          2: 4,
-          3: 2,
-          4: 1,
+        const quarterlyWeightedValues = {
+          monthAgo: 12,
+          threeMonthsAgo: 4,
+          sixMonthsAgo: 2,
+          yearAgo: 1,
         };
 
-        const constant = adjIndex[index];
+        const weightedValues = Object.values(quarterlyWeightedValues);
+        const weightedValue = weightedValues[index - 1];
 
         const outline = {
-          to: yesterdayOutline.date,
+          to: yesterdayOverview.date,
           from: cur.date,
           rateOfRetrun: `${rateOfRetrun}%`,
-          adjMargin: this.utils.twoDecimalPoint(rateOfRetrun * constant), // Momentum을 이용하기 위한 조정 값
+          adjMargin: this.utils.twoDecimalPoint(rateOfRetrun * weightedValue), // Momentum을 이용하기 위한 조정 값
         };
 
         acc.push(outline);
@@ -121,12 +132,11 @@ export class AssetsService {
     }
   }
   async getMomentumScoreByTicker(ticker: string) {
-    await this.utils.sleep(200);
     try {
       const today = format(new Date(), 'yy-MM-dd');
       const rawData = await this.getRawHistoricalPrices(ticker, today);
-      const rawDataBySection = await this.getDataBySection(rawData);
-      const outline = this.sectionalOutline(rawDataBySection);
+      const rawDataBySection = await this.classifyRawDataByQuarterly(rawData);
+      const outline = this.quarterlyOutline(rawDataBySection);
 
       const totalMomentumScore = outline
         .map((data) => data.adjMargin)
