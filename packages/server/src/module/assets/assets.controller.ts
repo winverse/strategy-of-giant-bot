@@ -12,4 +12,6 @@ export class AssetsController {
   async getMomentumScore(@Query('strategy') strategy: AssetsStrategy) {
     return await this.assetsService.getMomentumScoreByStretegy(strategy);
   }
+
+  // to-do: send result to telegram
 }

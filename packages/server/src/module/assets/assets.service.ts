@@ -121,7 +121,9 @@ export class AssetsService {
           to: yesterdayOverview.date,
           from: cur.date,
           rateOfRetrun: `${rateOfRetrun}%`,
-          adjMargin: this.utils.twoDecimalPoint(rateOfRetrun * weightedValue), // Momentum을 이용하기 위한 조정 값
+          adjustedReturn: this.utils.twoDecimalPoint(
+            rateOfRetrun * weightedValue,
+          ), // Momentum을 이용하기 위한 조정 값
         };
 
         acc.push(outline);
@@ -139,7 +141,7 @@ export class AssetsService {
       const outline = this.quarterlyOutline(rawDataBySection);
 
       const totalMomentumScore = outline
-        .map((data) => data.adjMargin)
+        .map((data) => data.adjustedReturn)
         .reduce(this.utils.sum);
 
       return {
