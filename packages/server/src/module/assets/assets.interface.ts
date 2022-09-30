@@ -7,11 +7,13 @@ export type QuarterlyOutline = {
   adjustedReturn: number;
 };
 
+export type TickerSummary = {
+  name: string;
+  outline: QuarterlyOutline[];
+  totalMomentumScore: number;
+};
+
 export type MomentumScoreSummary = {
   group: string;
-  data: {
-    ticker: string;
-    outline: QuarterlyOutline[];
-    totalMomentumScore: number;
-  }[];
+  tickers: TickerSummary[];
 };

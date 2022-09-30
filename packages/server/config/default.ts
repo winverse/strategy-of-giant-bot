@@ -7,7 +7,8 @@ export const config = {
   },
   telegram: {
     token: '',
-    chatId: '',
+    reading: '',
+    error: '',
   },
   database: {
     provider: '',

@@ -15,8 +15,11 @@ export class AssetsController {
 
   @Get('/messages')
   async printMessage(@Query('strategy') strategy: AssetsStrategy) {
-    const MomentumScoreSummary =
+    const momentumScoreSummary =
       await this.assetsService.getMomentumScoreByStretegy(strategy);
-    return await this.assetsService.printMessage(MomentumScoreSummary);
+    return await this.assetsService.printMessage(
+      strategy,
+      momentumScoreSummary,
+    );
   }
 }

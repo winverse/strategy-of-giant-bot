@@ -1,3 +1,6 @@
+import { PrintMessageResult } from './../../provider/messages/messages.interface';
+import { TickerSummary } from './assets.interface';
+import { MessagesService } from './../../provider/messages/messages.service';
 import {
   AssetsStrategy,
   MomentumScoreSummary,
@@ -19,8 +22,9 @@ import { BAD_REQUEST } from 'src/constants/errors/errors.contants';
 export class AssetsService {
   constructor(
     private readonly financeApi: FinanceApiService,
-    private readonly utils: UtilsService,
     private readonly tickersService: TickersService,
+    private readonly messagesService: MessagesService,
+    private readonly utils: UtilsService,
   ) {}
   private async getRawHistoricalPrices(
     ticker: string,
@@ -43,8 +47,6 @@ export class AssetsService {
           ticker,
           raw: tickerData as any,
         });
-      } else {
-        console.log('not save');
       }
 
       return tickerData;
@@ -52,61 +54,54 @@ export class AssetsService {
       throw new InternalServerErrorException(error);
     }
   }
-  private getRawDataByQuarterlyDate(
-    rawData: RawHistoricalPrice[],
-  ): RawHistoricalPrice[] {
-    const yesterday = subDays(new Date(), 1);
-
-    const quarterlyBaseDate = {
-      now: 0,
-      monthAgo: 1,
-      threeMonthsAgo: 3,
-      sixMonthsAgo: 6,
-      yearAgo: 12,
-    };
-
-    return Object.values(quarterlyBaseDate)
-      .map((quarter) => subMonths(yesterday, quarter))
-      .map((date) => {
-        let data = null;
-        let diff = 0;
-        while (!data) {
-          const adjDate = subDays(date, diff);
-          const formattedDate = format(adjDate, 'yyyy-MM-dd');
-          data = rawData.find((raw) => raw.date === formattedDate);
-          if (diff > 10) {
-            return rawData[rawData.length - 1];
-          }
-
-          if (!data) {
-            diff++;
-          }
-        }
-        return data;
-      });
-  }
-  private classifyRawDataByQuarterly(
+  private pickUpRawDataByQuarterly(
     rawData?: RawHistoricalPrice[],
   ): RawHistoricalPrice[] {
     try {
       if (!rawData) {
-        // console.log('ra', rawData);
         throw new Error('Failed load raw data from fmp');
       }
-      // load quarterly data
-      return this.getRawDataByQuarterlyDate(rawData);
+
+      const yesterday = subDays(new Date(), 1);
+      const quarterlyBaseDate = {
+        now: 0,
+        monthAgo: 1,
+        threeMonthsAgo: 3,
+        sixMonthsAgo: 6,
+        yearAgo: 12,
+      };
+
+      return Object.values(quarterlyBaseDate)
+        .map((quarter) => subMonths(yesterday, quarter))
+        .map((date) => {
+          let data = null;
+          let diff = 0;
+          while (!data) {
+            const adjDate = subDays(date, diff);
+            const formattedDate = format(adjDate, 'yyyy-MM-dd');
+            data = rawData.find((raw) => raw.date === formattedDate);
+            if (diff > 10) {
+              return rawData[rawData.length - 1];
+            }
+
+            if (!data) {
+              diff++;
+            }
+          }
+          return data;
+        });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
   private quarterlyOutline(rawData: RawHistoricalPrice[]): QuarterlyOutline[] {
     try {
-      return rawData.reduce((acc, cur, index, origin) => {
-        if (index === 0) return acc;
+      return rawData.reduce((outlines, raw, index, origin) => {
+        if (index === 0) return outlines;
         const yesterdayOverview = origin[0];
 
         const returnComparedWithYesterday =
-          (yesterdayOverview.close / cur.close) * 100 - 100;
+          (yesterdayOverview.close / raw.close) * 100 - 100;
 
         const rateOfRetrun = this.utils.twoDecimalPoint(
           returnComparedWithYesterday,
@@ -124,25 +119,25 @@ export class AssetsService {
 
         const outline = {
           to: yesterdayOverview.date,
-          from: cur.date,
+          from: raw.date,
           rateOfRetrun: `${rateOfRetrun}%`,
           adjustedReturn: this.utils.twoDecimalPoint(
             rateOfRetrun * weightedValue,
           ), // Momentum을 이용하기 위한 조정 값
         };
 
-        acc.push(outline);
-        return acc;
+        outlines.push(outline);
+        return outlines;
       }, []);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-  async getMomentumScoreByTicker(ticker: string) {
+  async getMomentumScoreByTicker(ticker: string): Promise<TickerSummary> {
     try {
-      const today = format(new Date(), 'yy-MM-dd');
+      const today = this.utils.today();
       const rawData = await this.getRawHistoricalPrices(ticker, today);
-      const rawDataBySection = await this.classifyRawDataByQuarterly(rawData);
+      const rawDataBySection = await this.pickUpRawDataByQuarterly(rawData);
       const outline = this.quarterlyOutline(rawDataBySection);
 
       const totalMomentumScore = outline
@@ -150,16 +145,17 @@ export class AssetsService {
         .reduce(this.utils.sum);
 
       return {
-        ticker,
+        name: ticker,
         outline,
         totalMomentumScore: this.utils.twoDecimalPoint(totalMomentumScore),
       };
     } catch (error) {
-      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }
-  async getMomentumScoreByStretegy(strategy: AssetsStrategy) {
+  async getMomentumScoreByStretegy(
+    strategy: AssetsStrategy,
+  ): Promise<MomentumScoreSummary[]> {
     try {
       if (!['DAA', 'VAA'].includes(strategy)) {
         throw new BadRequestException(BAD_REQUEST);
@@ -176,7 +172,7 @@ export class AssetsService {
         tickerByGroup.flatMap(async ({ group, tickers }) => {
           return {
             group,
-            data: await Promise.all(
+            tickers: await Promise.all(
               tickers.map(
                 async (ticker) => await this.getMomentumScoreByTicker(ticker),
               ),
@@ -188,8 +184,19 @@ export class AssetsService {
       throw new InternalServerErrorException(error);
     }
   }
-  async printMessage(momentumSocreSummary: MomentumScoreSummary[]) {
+  async printMessage(
+    strategy: AssetsStrategy,
+    summary: MomentumScoreSummary[],
+  ) {
     try {
+      const messageTable: Record<AssetsStrategy, any> = {
+        DAA: () => this.messagesService.printMessageForDAAStarategy(summary),
+        VAA: () => this.messagesService.printMessageForVAAStarategy(summary),
+      };
+
+      const result: PrintMessageResult = messageTable[strategy]();
+
+      return result.message;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

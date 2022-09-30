@@ -20,6 +20,10 @@ async function bootstrap() {
   const port = process.env.PORT;
 
   await fastify.listen(port, (err, address) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
     console.log(`Server is Running: ${address}`);
   });
 }

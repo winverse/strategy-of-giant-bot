@@ -7,7 +7,8 @@ export interface AppConfig {
 
 export interface TelegramConfig {
   readonly token: string;
-  readonly chatId: string;
+  readonly reading: string;
+  readonly error: string;
 }
 
 export interface DatabaseConfig {

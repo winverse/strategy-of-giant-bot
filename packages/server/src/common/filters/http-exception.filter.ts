@@ -42,7 +42,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       `;
 
       if (this.utils.mode.isProd) {
-        this.bot.telegramSendMessage(log);
+        this.bot.telegramSendMessage(log, 'error');
         this.logger.error(exception);
       }
 
@@ -59,7 +59,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       console.error(exception);
       reply
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send('internal server error');
+        .send('Internal server error');
     }
   }
 }

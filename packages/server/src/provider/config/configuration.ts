@@ -11,7 +11,8 @@ function configValidator(config: Config) {
     }),
     telegram: Joi.object().keys({
       token: Joi.string().required(),
-      chatId: Joi.string().required(),
+      reading: Joi.string().required(),
+      error: Joi.string().required(),
     }),
     database: Joi.object().keys({
       provider: Joi.string().required(),

@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -7,6 +8,9 @@ export class UtilsService {
       isProd: process.env.NODE_ENV === 'production',
       isDev: process.env.NODE_ENV !== 'production',
     };
+  }
+  today(form = 'yy-MM-dd') {
+    return format(new Date(), form);
   }
   sleep(delay: number) {
     return new Promise((resolve) => setTimeout(resolve, delay));
