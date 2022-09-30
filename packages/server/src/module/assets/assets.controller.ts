@@ -13,5 +13,10 @@ export class AssetsController {
     return await this.assetsService.getMomentumScoreByStretegy(strategy);
   }
 
-  // to-do: send result to telegram
+  @Get('/messages')
+  async printMessage(@Query('strategy') strategy: AssetsStrategy) {
+    const MomentumScoreSummary =
+      await this.assetsService.getMomentumScoreByStretegy(strategy);
+    return await this.assetsService.printMessage(MomentumScoreSummary);
+  }
 }

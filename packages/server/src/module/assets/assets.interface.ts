@@ -6,3 +6,12 @@ export type QuarterlyOutline = {
   rateOfRetrun: number;
   adjustedReturn: number;
 };
+
+export type MomentumScoreSummary = {
+  group: string;
+  data: {
+    ticker: string;
+    outline: QuarterlyOutline[];
+    totalMomentumScore: number;
+  }[];
+};

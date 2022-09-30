@@ -1,1 +1,3 @@
 export const BAD_REQUEST = 'BAD_REQUEST';
+
+export const NO_HISTORICAL_DATA = 'NO_HISTORICAL_DATA_FROM_FMP';

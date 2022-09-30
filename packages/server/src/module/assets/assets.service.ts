@@ -1,5 +1,6 @@
 import {
   AssetsStrategy,
+  MomentumScoreSummary,
   QuarterlyOutline,
 } from '@module/assets/assets.interface';
 import {
@@ -32,8 +33,9 @@ export class AssetsService {
 
       if (existsTicker) return existsTicker.raw as any;
 
-      await this.utils.sleep(300); // for free tier fmp server
-      const tickerData = await this.financeApi.getHistoricalPrice(ticker);
+      const tickerData = await this.utils.retry(5, () =>
+        this.financeApi.getHistoricalPrice(ticker),
+      );
 
       if (tickerData) {
         await this.tickersService.create({
@@ -41,6 +43,8 @@ export class AssetsService {
           ticker,
           raw: tickerData as any,
         });
+      } else {
+        console.log('not save');
       }
 
       return tickerData;
@@ -86,6 +90,7 @@ export class AssetsService {
   ): RawHistoricalPrice[] {
     try {
       if (!rawData) {
+        // console.log('ra', rawData);
         throw new Error('Failed load raw data from fmp');
       }
       // load quarterly data
@@ -150,6 +155,7 @@ export class AssetsService {
         totalMomentumScore: this.utils.twoDecimalPoint(totalMomentumScore),
       };
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }
@@ -178,6 +184,12 @@ export class AssetsService {
           };
         }),
       );
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  async printMessage(momentumSocreSummary: MomentumScoreSummary[]) {
+    try {
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
