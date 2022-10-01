@@ -37,7 +37,6 @@ export class AssetsController {
       await this.uitlsService.sleep(1000);
       await this.assetsService.getMomentumScoreByStretegy(strategy);
     }
-    console.log('성공');
   }
 
   @Cron('0 1 6 * * 1-5') // Monday to Friday at 06:01am
