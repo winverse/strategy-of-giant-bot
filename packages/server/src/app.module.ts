@@ -11,7 +11,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from '@common/filters';
 import { BotModule } from '@provider/bot';
 import { TickersModule } from './module/tickers/tickers.module';
-import { MessagesModule } from './provider/messages/messages.module';
+import { ReportModule } from './provider/report/report.module';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { MessagesModule } from './provider/messages/messages.module';
     PrismaModule,
     BotModule,
     TickersModule,
-    MessagesModule,
+    ReportModule,
   ],
   providers: [
     {

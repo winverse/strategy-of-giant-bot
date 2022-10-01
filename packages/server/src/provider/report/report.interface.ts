@@ -1,4 +1,4 @@
-export type PrintMessageResult = {
+export type MomentumScoreReportResult = {
   message: string;
   meta: Record<any, any>;
 };

@@ -1,6 +1,5 @@
-import { PrintMessageResult } from './../../provider/messages/messages.interface';
+import { ReportService } from '@provider/report/report.service';
 import { TickerSummary } from './assets.interface';
-import { MessagesService } from './../../provider/messages/messages.service';
 import {
   AssetsStrategy,
   MomentumScoreSummary,
@@ -17,13 +16,14 @@ import { TickersService } from '@module/tickers/tickers.service';
 import { UtilsService } from '@provider/utils';
 import { subDays, format, subMonths } from 'date-fns';
 import { BAD_REQUEST } from 'src/constants/errors/errors.contants';
+import { MomentumScoreReportResult } from '@provider/report/report.interface';
 
 @Injectable()
 export class AssetsService {
   constructor(
     private readonly financeApi: FinanceApiService,
     private readonly tickersService: TickersService,
-    private readonly messagesService: MessagesService,
+    private readonly reportService: ReportService,
     private readonly utils: UtilsService,
   ) {}
   private async getRawHistoricalPrices(
@@ -184,17 +184,17 @@ export class AssetsService {
       throw new InternalServerErrorException(error);
     }
   }
-  async printMessage(
+  async printReportMessage(
     strategy: AssetsStrategy,
     summary: MomentumScoreSummary[],
   ) {
     try {
       const messageTable: Record<AssetsStrategy, any> = {
-        DAA: () => this.messagesService.printMessageForDAAStarategy(summary),
-        VAA: () => this.messagesService.printMessageForVAAStarategy(summary),
+        DAA: () => this.reportService.createReportForDAAStarategy(summary),
+        VAA: () => this.reportService.createReportForVAAStarategy(summary),
       };
 
-      const result: PrintMessageResult = messageTable[strategy]();
+      const result: MomentumScoreReportResult = messageTable[strategy]();
 
       return result.message;
     } catch (error) {
