@@ -19,6 +19,9 @@ async function bootstrap() {
 
   const port = process.env.PORT;
 
+  if (!port) {
+    throw new Error('Missing PORT number in env');
+  }
   await fastify.listen(port, (err, address) => {
     if (err) {
       console.error(err);

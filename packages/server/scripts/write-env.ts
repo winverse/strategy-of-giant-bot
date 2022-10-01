@@ -43,6 +43,6 @@ class WriteEnv {
 
     await writeEnv.write();
   } catch (error) {
-    throw new Error(error);
+    throw new Error(error as any);
   }
 })();

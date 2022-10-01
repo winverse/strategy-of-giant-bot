@@ -74,7 +74,7 @@ export class AssetsService {
       return Object.values(quarterlyBaseDate)
         .map((quarter) => subMonths(yesterday, quarter))
         .map((date) => {
-          let data = null;
+          let data: RawHistoricalPrice | undefined = undefined;
           let diff = 0;
           while (!data) {
             const adjDate = subDays(date, diff);
@@ -96,39 +96,42 @@ export class AssetsService {
   }
   private quarterlyOutline(rawData: RawHistoricalPrice[]): QuarterlyOutline[] {
     try {
-      return rawData.reduce((outlines, raw, index, origin) => {
-        if (index === 0) return outlines;
-        const yesterdayOverview = origin[0];
+      return rawData.reduce<QuarterlyOutline[]>(
+        (outlines, raw, index, origin) => {
+          if (index === 0) return outlines;
+          const yesterdayOverview = origin[0];
 
-        const returnComparedWithYesterday =
-          (yesterdayOverview.close / raw.close) * 100 - 100;
+          const returnComparedWithYesterday =
+            (yesterdayOverview.close / raw.close) * 100 - 100;
 
-        const rateOfRetrun = this.utils.twoDecimalPoint(
-          returnComparedWithYesterday,
-        );
+          const rateOfRetrun = this.utils.twoDecimalPoint(
+            returnComparedWithYesterday,
+          );
 
-        const quarterlyWeightedValues = {
-          monthAgo: 12,
-          threeMonthsAgo: 4,
-          sixMonthsAgo: 2,
-          yearAgo: 1,
-        };
+          const quarterlyWeightedValues = {
+            monthAgo: 12,
+            threeMonthsAgo: 4,
+            sixMonthsAgo: 2,
+            yearAgo: 1,
+          };
 
-        const weightedValues = Object.values(quarterlyWeightedValues);
-        const weightedValue = weightedValues[index - 1];
+          const weightedValues = Object.values(quarterlyWeightedValues);
+          const weightedValue = weightedValues[index - 1];
 
-        const outline = {
-          to: yesterdayOverview.date,
-          from: raw.date,
-          rateOfRetrun: `${rateOfRetrun}%`,
-          adjustedReturn: this.utils.twoDecimalPoint(
-            rateOfRetrun * weightedValue,
-          ), // Momentum을 이용하기 위한 조정 값
-        };
+          const outline = {
+            to: yesterdayOverview.date,
+            from: raw.date,
+            rateOfRetrun,
+            adjustedReturn: this.utils.twoDecimalPoint(
+              rateOfRetrun * weightedValue,
+            ), // Momentum을 이용하기 위한 조정 값
+          };
 
-        outlines.push(outline);
-        return outlines;
-      }, []);
+          outlines.push(outline);
+          return outlines;
+        },
+        [],
+      );
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -157,12 +160,13 @@ export class AssetsService {
     strategy: AssetsStrategy,
   ): Promise<MomentumScoreSummary[]> {
     try {
-      if (!['DAA', 'VAA'].includes(strategy)) {
+      const upperStrategy = strategy.toUpperCase() as AssetsStrategy;
+      if (!['DAA', 'VAA'].includes(upperStrategy)) {
         throw new BadRequestException(BAD_REQUEST);
       }
 
       const tickersByStrategy =
-        this.tickersService.getTickersByStrategy(strategy);
+        this.tickersService.getTickersByStrategy(upperStrategy);
 
       const tickerByGroup = Object.entries(tickersByStrategy).map(
         ([key, tickers]) => ({ group: key, tickers }),

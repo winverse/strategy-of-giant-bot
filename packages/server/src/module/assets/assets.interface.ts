@@ -1,8 +1,8 @@
 export type AssetsStrategy = 'VAA' | 'DAA';
 
 export type QuarterlyOutline = {
-  to: Date;
-  from: Date;
+  to: string;
+  from: string;
   rateOfRetrun: number;
   adjustedReturn: number;
 };
