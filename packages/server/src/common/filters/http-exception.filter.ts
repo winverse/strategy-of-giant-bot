@@ -42,7 +42,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       `;
 
       if (this.utils.mode.isProd) {
-        this.bot.telegramSendMessage(log, 'error');
+        this.bot.telegramSendMessage('error', log);
         this.logger.error(exception);
       }
 

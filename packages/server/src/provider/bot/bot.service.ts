@@ -9,7 +9,7 @@ import TelegramBot from 'node-telegram-bot-api';
 @Injectable()
 export class BotService {
   constructor(private readonly config: ConfigService) {}
-  telegramSendMessage(message: string, roomName: BotRoomName) {
+  telegramSendMessage(roomName: BotRoomName, message: string) {
     const { token, ...rest } = this.config.get('telegram');
 
     const bot = new TelegramBot(token);

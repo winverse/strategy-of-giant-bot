@@ -12,10 +12,12 @@ import { HttpExceptionFilter } from '@common/filters';
 import { BotModule } from '@provider/bot';
 import { TickersModule } from './module/tickers/tickers.module';
 import { ReportModule } from './provider/report/report.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     NestConfigModule.forRoot({ load: [configuration] }),
+    ScheduleModule.forRoot(),
     ConfigModule,
     LoggerModule,
     FinanceApiModule,
