@@ -50,7 +50,7 @@ export class TickersService {
       throw new InternalServerErrorException(error);
     }
   }
-  async create(input: Prisma.TickersCreateInput): Promise<Tickers> {
+  async createTicker(input: Prisma.TickersCreateInput): Promise<Tickers> {
     try {
       const data = await this.prisma.tickers.create({
         data: {

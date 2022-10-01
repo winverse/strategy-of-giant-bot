@@ -10,7 +10,7 @@ export type QuarterlyOutline = {
 export type TickerSummary = {
   name: string;
   outline: QuarterlyOutline[];
-  totalMomentumScore: number;
+  momentumScore: number;
 };
 
 export type MomentumScoreSummary = {

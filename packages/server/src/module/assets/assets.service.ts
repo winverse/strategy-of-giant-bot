@@ -42,7 +42,7 @@ export class AssetsService {
       );
 
       if (tickerData) {
-        await this.tickersService.create({
+        await this.tickersService.createTicker({
           date: today,
           ticker,
           raw: tickerData as any,
@@ -140,14 +140,14 @@ export class AssetsService {
       const rawDataBySection = await this.pickUpRawDataByQuarterly(rawData);
       const outline = this.quarterlyOutline(rawDataBySection);
 
-      const totalMomentumScore = outline
+      const momentumScore = outline
         .map((data) => data.adjustedReturn)
         .reduce(this.utils.sum);
 
       return {
         name: ticker,
         outline,
-        totalMomentumScore: this.utils.twoDecimalPoint(totalMomentumScore),
+        momentumScore: this.utils.twoDecimalPoint(momentumScore),
       };
     } catch (error) {
       throw new InternalServerErrorException(error);
