@@ -69,13 +69,14 @@ export class AssetsService {
         threeMonthsAgo: 3,
         sixMonthsAgo: 6,
         yearAgo: 12,
-      };
+      } as const;
 
       return Object.values(quarterlyBaseDate)
         .map((quarter) => subMonths(yesterday, quarter))
         .map((date) => {
           let data: RawHistoricalPrice | undefined = undefined;
           let diff = 0;
+          // Find data considering closed days
           while (!data) {
             const adjDate = subDays(date, diff);
             const formattedDate = format(adjDate, 'yyyy-MM-dd');
@@ -113,22 +114,21 @@ export class AssetsService {
             threeMonthsAgo: 4,
             sixMonthsAgo: 2,
             yearAgo: 1,
-          };
+          } as const;
 
           const weightedValues = Object.values(quarterlyWeightedValues);
           const weightedValue = weightedValues[index - 1];
 
           const outline = {
-            to: yesterdayOverview.date,
             from: raw.date,
+            to: yesterdayOverview.date,
             rateOfRetrun,
             adjustedReturn: this.utils.twoDecimalPoint(
               rateOfRetrun * weightedValue,
-            ), // Momentum을 이용하기 위한 조정 값
+            ), // Adjustment value to take advantage of Momentum
           };
 
-          outlines.push(outline);
-          return outlines;
+          return outlines.concat(outline);
         },
         [],
       );

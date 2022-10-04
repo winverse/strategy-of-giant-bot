@@ -1,7 +1,7 @@
 import { UtilsService } from '@provider/utils';
 import { AssetsStrategy } from '@module/assets/assets.interface';
 import { AssetsService } from '@module/assets/assets.service';
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Post, Query } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { BotService } from '@provider/bot';
 
@@ -40,6 +40,7 @@ export class AssetsController {
   }
 
   @Cron('0 1 6 * * 1-5') // Monday to Friday at 06:01am
+  @Post('/')
   async sendReportToTelegram() {
     const strategies: AssetsStrategy[] = ['VAA', 'DAA'];
 

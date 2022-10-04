@@ -18,5 +18,5 @@ export const config = {
     userName: '',
     password: '',
   },
-  financeAPIKey: '',
+  financeApiKey: '',
 };
