@@ -37,7 +37,7 @@
   );
 ```
 
-## 2. Cache base on database
+## 2. Cached ticker Data base on database
 ```JS
   if (tickerData) {
     await this.tickersService.createTicker({
