@@ -112,7 +112,7 @@ export class ReportService {
 
     const momentumScoreInfo = this.getMomentumScoreForTickers(summary);
 
-    let message = `[VAA Strategy]\n`;
+    let message = `[DAA Strategy]\n`;
     message += `날짜: ${this.today}\n\n`;
     message += `자산 중, 매수 금액 비율: ${buyingRatio}%\n`;
     message += `모멘텀 스코어 상위 6개 종목: ${
