@@ -26,7 +26,7 @@
 ```
 # Run in Telegram
 
-![example.png](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a9df9d42-bff8-4e9f-908c-4b88e4397ea0/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-10-04_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_6.09.43.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20221004%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20221004T090958Z&X-Amz-Expires=86400&X-Amz-Signature=ac8bed7577e96006db8eb169c873182c2474a012ae4ad99969b3c6f0deafd2a5&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22%25E1%2584%2589%25E1%2585%25B3%25E1%2584%258F%25E1%2585%25B3%25E1%2584%2585%25E1%2585%25B5%25E1%2586%25AB%25E1%2584%2589%25E1%2585%25A3%25E1%2586%25BA%25202022-10-04%2520%25E1%2584%258B%25E1%2585%25A9%25E1%2584%2592%25E1%2585%25AE%25206.09.43.png%22&x-id=GetObject)
+![example.png](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/33c1d622-49b8-4997-9cea-e2fd746519d7/images.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20221004%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20221004T101145Z&X-Amz-Expires=86400&X-Amz-Signature=d1070ae264c1daf7db75e2c554f39b4be7d98b85f0728d4b103c4ef155c1e52f&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22images.png%22&x-id=GetObject)
 
 # Feature
 
