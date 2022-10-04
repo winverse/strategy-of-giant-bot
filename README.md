@@ -24,6 +24,8 @@
 ```
 (12 * (p0 / p21 – 1)) + (4 * (p0 / p63 – 1)) + (2 * (p0 / p126 – 1)) + (p0 / p252 – 1)
 ```
+> Where p0 = the asset’s price at today’s close, p1 = the asset’s price at the close of the previous trading day and so on. 21, 63, 126 and 252 days correspond to 1, 3, 6 and 12 months.
+
 # Run in Telegram
 
 ![example.png](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/33c1d622-49b8-4997-9cea-e2fd746519d7/images.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20221004%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20221004T101145Z&X-Amz-Expires=86400&X-Amz-Signature=d1070ae264c1daf7db75e2c554f39b4be7d98b85f0728d4b103c4ef155c1e52f&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22images.png%22&x-id=GetObject)
