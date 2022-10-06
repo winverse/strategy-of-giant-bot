@@ -28,67 +28,7 @@
 
 # Run in Telegram
 
-![example.png](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/33c1d622-49b8-4997-9cea-e2fd746519d7/images.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20221004%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20221004T101145Z&X-Amz-Expires=86400&X-Amz-Signature=d1070ae264c1daf7db75e2c554f39b4be7d98b85f0728d4b103c4ef155c1e52f&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22images.png%22&x-id=GetObject)
-
-# Feature
-
-## 1. Retry func
-```JS
-  const tickerData = await this.utils.retry(5, () =>
-    this.financeApi.getHistoricalPrice(ticker),
-  );
-```
-
-## 2. Cached ticker data base on database
-```JS
-  if (tickerData) {
-    await this.tickersService.createTicker({
-      date: today,
-      ticker,
-      raw: tickerData as any,
-    });
-  }
-```
-
-## 3. Momentum Score calculator
-```JS
-return rawData.reduce<QuarterlyOutline[]>(
-  (outlines, raw, index, origin) => {
-    if (index === 0) return outlines;
-    const yesterdayOverview = origin[0];
-
-    const returnComparedWithYesterday =
-      (yesterdayOverview.close / raw.close) * 100 - 100;
-
-    const rateOfRetrun = this.utils.twoDecimalPoint(
-      returnComparedWithYesterday,
-    );
-
-    // Quarterly Weight
-    const quarterlyWeightedValues = {
-      monthAgo: 12,
-      threeMonthsAgo: 4,
-      sixMonthsAgo: 2,
-      yearAgo: 1,
-    } as const
-
-    const weightedValues = Object.values(quarterlyWeightedValues);
-    const weightedValue = weightedValues[index - 1];
-
-    const outline = {
-      from: raw.date,
-      to: yesterdayOverview.date,
-      rateOfRetrun,
-      adjustedReturn: this.utils.twoDecimalPoint(
-        rateOfRetrun * weightedValue,
-      ), // Adjustment value to take advantage of Momentum
-    };
-
-    return outlines.concat(outline);
-  },
-  [],
-);
-```
+![example.png](https://camo.githubusercontent.com/9a86975f4d45648b849be7c78a8884995b53c058b2747213fbe59fdfdea88ff2/68747470733a2f2f73332e75732d776573742d322e616d617a6f6e6177732e636f6d2f7365637572652e6e6f74696f6e2d7374617469632e636f6d2f33336331643632322d343962382d343939372d396365612d6532666437343635313964372f696d616765732e706e673f582d416d7a2d416c676f726974686d3d415753342d484d41432d53484132353626582d416d7a2d436f6e74656e742d5368613235363d554e5349474e45442d5041594c4f414426582d416d7a2d43726564656e7469616c3d414b49415437334c324734354549505433583435253246323032323130303425324675732d776573742d322532467333253246617773345f7265717565737426582d416d7a2d446174653d3230323231303034543130313134355a26582d416d7a2d457870697265733d383634303026582d416d7a2d5369676e61747572653d6431303730616532363463316461663764623735653263353534663339623462653764393862383566303732386434623130336334656631353563316535326626582d416d7a2d5369676e6564486561646572733d686f737426726573706f6e73652d636f6e74656e742d646973706f736974696f6e3d66696c656e616d65253230253344253232696d616765732e706e6725323226782d69643d4765744f626a656374)
 
 # Stack
 
