@@ -4,6 +4,10 @@
   "workspaces": [
     "packages/*"
   ],
+  "author": "SangHyun <public.winverse@gmail.com>",
+  "private": true,
+  "license": "MIT License",
+  "keywords": ["quant", "investments", "VAA", "DAA"],
   "scripts": {
     "server:dev": "yarn workspace server start:dev",
     "prisma:generate": "yarn workspace server prisma:generate",
