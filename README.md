@@ -40,6 +40,9 @@
  - Fastify
  - Prisma
 
+## Data
+ - [Equibles](https://equibles.com): stock market data API
+
 # Milestone
 - [X] Ticker별 데이터 불러오기
 - [X] Ticker별 데이터 정리(outline)
