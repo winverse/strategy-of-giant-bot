@@ -56,7 +56,7 @@ $S/capture.sh db   <label>                                             # Tickers
 $S/check-report.sh VAA <scores-label> <report-label>                   # report vs README rules
 ```
 
-Routes are under the global prefix `/api` with URI version `v1`, so `/api/v1/assets…`. Strategy values are `VAA` and `DAA`, in uppercase (see gotchas). `check-report.sh` re-derives the expected picks from the captured scores with jq, following the README rules rather than `ReportService`, and checks that the report text states them.
+Routes are under the global prefix `/api` with URI version `v1`, so `/api/v1/assets…`. Strategy values are `VAA` and `DAA`, in any case (`vaa` works too). `check-report.sh` re-derives the expected picks from the captured scores with jq, following the README rules rather than the app's allocation code (`src/strategy/allocation/`), and checks that the report text states them.
 
 `capture.sh` refuses `POST /api/v1/assets`. That route sends both reports to the real Telegram `reading` chat, and this instance has only placeholder credentials. See `features/telegram-dispatch.md`.
 
@@ -66,7 +66,7 @@ Feature recipes are in [`features/README.md`](features/README.md). A proof that 
 
 - Location: `.verify/giants-api/evidence/<UTC stamp>/`, gitignored and created by `launch.sh`. Server, Postgres, Prisma and initdb logs are copied to `logs/` there at cleanup.
 - Proof standards:
-  - Drive the real HTTP path that produces the Telegram text, not `ReportService` directly. The property test in `verify-allocation-rules` covers the logic alone.
+  - Drive the real HTTP path that produces the Telegram text, not the allocation functions directly. The property test in `verify-allocation-rules` covers the logic alone.
   - Capture the action and the resulting state. Take a cache snapshot before and after, and keep the report text, the scores JSON it came from, and `check-report.sh` output.
   - Verify side effects. A first request of the day must add one `Tickers` row per newly fetched ticker, dated today as `yy-MM-dd`, and a repeat must add none.
   - Mocks only where a production boundary already isolates the system: here only Telegram, which is not exercised. Equibles is called for real.

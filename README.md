@@ -48,6 +48,21 @@ This project uses month-end, dividend-adjusted closing prices, and rebalances at
 ## Data
  - [Equibles](https://equibles.com): stock market data API
 
+# Server structure
+
+`packages/server/src` is grouped by domain.
+
+- `strategy/`: momentum scores, VAA/DAA allocation, the Telegram report, HTTP routes and the schedule
+- `price/`: Equibles prices and their daily cache
+- `config/`, `database/`, `logger/`, `telegram/`, `common/`: code that every domain shares
+
+Rules:
+
+- Inside a domain, subfolders (`allocation/`, `momentum/`, `report/`) hold plain functions only: no dependency injection, database, API calls or current-time reads. Nest files (`*.module.ts`, `*.controller.ts`, `*.service.ts`, `*.repository.ts`, `*.client.ts`) sit directly in the domain folder.
+- A domain uses another domain only through its service and types.
+- Unit tests sit next to the code (`vaa.ts` → `vaa.spec.ts`). HTTP tests and shared fixtures live in `packages/server/test/`. Test descriptions are written in Korean.
+- `bun test` runs every test. `bun run test:unit` and `bun run test:e2e` run one kind.
+
 # Milestone
 - [X] Fetch data for each ticker
 - [X] Organize data for each ticker (outline)

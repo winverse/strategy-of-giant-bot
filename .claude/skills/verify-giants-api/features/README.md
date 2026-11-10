@@ -13,7 +13,7 @@ This directory is the maintained source for verifying the user-facing behavior o
 
 - Run everything from the repo root, with `S=.claude/skills/verify-giants-api/scripts`.
 - Drive HTTP only through `$S/capture.sh http <label> <METHOD> <path>`, so every request leaves proof.
-- Use uppercase strategy values `VAA` and `DAA`.
+- Strategy values are `VAA` and `DAA` (case-insensitive).
 - Label captures `<feature>-<step>-<what>` so the evidence dir reads in order.
 - Take a `$S/capture.sh db <label>` snapshot before and after any step that should touch the cache.
 

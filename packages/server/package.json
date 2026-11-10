@@ -6,19 +6,15 @@
   "private": true,
   "license": "MIT License",
   "imports": {
-    "#common/filters": "./src/common/filters/index.ts",
-    "#module/tickers": "./src/module/tickers/index.ts",
-    "#provider/bot": "./src/provider/bot/index.ts",
-    "#provider/config": "./src/provider/config/index.ts",
-    "#provider/finance-api": "./src/provider/finance-api/index.ts",
-    "#provider/logger": "./src/provider/logger/index.ts",
-    "#provider/prisma": "./src/provider/prisma/index.ts",
-    "#provider/utils": "./src/provider/utils/index.ts",
     "#common/*": "./src/common/*.ts",
-    "#constants/*": "./src/constants/*.ts",
-    "#module/*": "./src/module/*.ts",
-    "#provider/*": "./src/provider/*.ts",
-    "#config/*": "./config/*.ts"
+    "#config/*": "./src/config/*.ts",
+    "#database/*": "./src/database/*.ts",
+    "#logger/*": "./src/logger/*.ts",
+    "#price/*": "./src/price/*.ts",
+    "#strategy/*": "./src/strategy/*.ts",
+    "#telegram/*": "./src/telegram/*.ts",
+    "#env/*": "./config/*.ts",
+    "#test/*": "./test/*.ts"
   },
   "scripts": {
     "write:env": "bun ./scripts/write-env.ts",

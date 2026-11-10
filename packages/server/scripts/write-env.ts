@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import { Config } from '#provider/config';
+import type { Config } from '#config/config.types';
 
 class WriteEnv {
   isDev = false;

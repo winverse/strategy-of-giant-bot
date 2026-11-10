@@ -23,17 +23,17 @@ Preconditions:
 
 - **Cache before.** Run `$S/capture.sh db report-0-cache`. It reports `0 cached rows`.
 - **VAA report.** Run `$S/capture.sh http report-1-vaa GET '/api/v1/assets/reports?strategy=VAA'`. Status is `200`, taking 1–3 s on a fresh cache, and `report-1-vaa.txt` starts with `[VAA Strategy]`, then `날짜:` (today) and `기준일:` (last trading day of last month).
-- **VAA scores.** Run `$S/capture.sh http report-2-vaa-scores GET '/api/v1/assets?strategy=VAA'`. Status is `200` with groups `offense` (SPY, VEA, VWO, AGG) and `deffense` (SHY, IEF, LQD).
+- **VAA scores.** Run `$S/capture.sh http report-2-vaa-scores GET '/api/v1/assets?strategy=VAA'`. Status is `200` with groups `offense` (SPY, VEA, VWO, AGG) and `defense` (SHY, IEF, LQD).
 - **VAA rule check.** Run `$S/check-report.sh VAA report-2-vaa-scores report-1-vaa`. Exit is `0`, with `ok` lines for the bought group and ticker and its score.
 - **DAA report.** Run `$S/capture.sh http report-3-daa GET '/api/v1/assets/reports?strategy=DAA'`. Status is `200`, and `report-3-daa.txt` starts with `[DAA Strategy]` and contains `종목별 매수 금액 비율:`.
-- **DAA scores.** Run `$S/capture.sh http report-4-daa-scores GET '/api/v1/assets?strategy=DAA'`. Status is `200` with groups `canary` (BND, VWO), `offense` (12 tickers) and `deffense` (SHY, IEF, LQD).
+- **DAA scores.** Run `$S/capture.sh http report-4-daa-scores GET '/api/v1/assets?strategy=DAA'`. Status is `200` with groups `canary` (BND, VWO), `offense` (12 tickers) and `defense` (SHY, IEF, LQD).
 - **DAA rule check.** Run `$S/check-report.sh DAA report-4-daa-scores report-3-daa`. Exit is `0`, with `ok` lines for the canary count, offense share, top-N list, defense share and defense pick.
 - **Cache after.** Run `$S/capture.sh db report-5-cache`. It reports `17 cached rows`: the 7 VAA tickers plus 10 DAA-only tickers, all dated today as `yy-MM-dd`.
 - **Proof.** Keep `report-1-vaa.txt`, `report-3-daa.txt`, both scores JSONs, both `.check.txt` files and both cache snapshots. Together they show the action, the decision, and that it follows the rules.
 
 ## Gotchas
 
-- `strategy` must be uppercase on this route. `?strategy=vaa` returns `500` with body `Internal server error`, though the scores route accepts lowercase. A missing `strategy` also returns `500`.
+- `strategy` is case-insensitive on this route too (`?strategy=vaa` works). A missing, empty or unknown `strategy` returns `400 BAD_REQUEST`.
 - A non-HTTP error in this route reaches the client as a plain-text `500`, and `server.log` shows `FST_ERR_BAD_STATUS_CODE ... invalid status code: undefined`. Read the stack above it for the real cause.
 - The DAA weight line rounds each offense slice to two decimals, so six picks print `16.67%` each (100.02% total). That is not a failure.
 - Momentum scores round each period's return to two decimals before weighting (×12 for one month). A recompute with the README formula and no rounding drifts by up to about 0.1 (observed 31.93 vs 31.97 for IEF). Compare to the app's rounding order when recomputing by hand.

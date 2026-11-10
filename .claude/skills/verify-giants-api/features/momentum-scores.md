@@ -4,7 +4,7 @@ The scores route returns, for one strategy, each ticker group with every ticker'
 
 ## Sub-features
 
-- `scores-groups` returns the strategy's groups in order: VAA `offense`, `deffense`; DAA `canary`, `offense`, `deffense`.
+- `scores-groups` returns the strategy's groups in order: VAA `offense`, `defense`; DAA `canary`, `offense`, `defense`.
 - `scores-outline` returns four comparisons per ticker, all ending on the same base date (last trading day of last month) and starting 1, 3, 6 and 12 months earlier.
 - `scores-validation` rejects an unknown strategy with `400 BAD_REQUEST`.
 
@@ -19,7 +19,7 @@ Preconditions:
 - An instance from `$S/launch.sh`, and `$S/doctor.sh` exits 0.
 - `S=.claude/skills/verify-giants-api/scripts` in the shell.
 
-- **VAA scores.** Run `$S/capture.sh http scores-1-vaa GET '/api/v1/assets?strategy=VAA'`. Status is `200`, and `jq -c '.[] | {group, n: (.tickers | length)}' <evidence>/scores-1-vaa.json` prints `offense` 4 and `deffense` 3.
+- **VAA scores.** Run `$S/capture.sh http scores-1-vaa GET '/api/v1/assets?strategy=VAA'`. Status is `200`, and `jq -c '.[] | {group, n: (.tickers | length)}' <evidence>/scores-1-vaa.json` prints `offense` 4 and `defense` 3.
 - **Outline shape.** Run `jq -c '.[0].tickers[0].outline | map([.from, .to, .adjustedReturn])' <evidence>/scores-1-vaa.json`. It shows four rows with one shared `to` date. The `from` dates are the month-ends 1, 3, 6 and 12 months before that, each moved back to the last trading day.
 - **Score sums its parts.** Run `jq '.[0].tickers[0] | [.momentumScore, (.outline | map(.adjustedReturn) | add)]' <evidence>/scores-1-vaa.json`. The two numbers agree to two decimals.
 - **Lowercase accepted.** Run `$S/capture.sh http scores-2-lower GET '/api/v1/assets?strategy=vaa'`. Status is `200` with the same groups.
@@ -28,7 +28,7 @@ Preconditions:
 
 ## Gotchas
 
-- The group is spelled `deffense` (double f) in the API. Use that key in jq.
-- In DAA, VWO is in both `canary` and `offense`, and LQD in both `offense` and `deffense`. Each appearance is its own entry with the same score.
-- A missing `strategy` returns `500` with plain text, not `400`.
+- The defense group is `defense`, and each outline has `from`, `to`, `rateOfReturn`, `adjustedReturn`. Before 2026-11-10 the API spelled them `deffense` and `rateOfRetrun`, so older evidence uses those keys.
+- In DAA, VWO is in both `canary` and `offense`, and LQD in both `offense` and `defense`. Each appearance is its own entry with the same score.
+- A missing or empty `strategy` also returns `400 BAD_REQUEST`.
 - On a fresh cache the first call takes 1–3 s per strategy (live Equibles fetch). Later calls take milliseconds.
