@@ -18,11 +18,11 @@ The bot posts the VAA report and then the DAA report to the Telegram chat config
 Preconditions:
 
 - Not drivable on a `launch.sh` instance. It has placeholder Telegram credentials, and `capture.sh` refuses `POST /api/v1/assets`.
-- Proving delivery needs a real bot token and a chat the developer agrees to receive test posts in. Both live in their own `packages/server/config/development.ts`. Ask before sending anything.
+- Proving delivery needs a real bot token and a chat the developer agrees to receive test posts in. Both live in their own `apps/server/config/development.ts`. Ask before sending anything.
 
 - **Report text.** Verify the text that would be sent with `strategy-report.md`. The POST builds it with the same calls in the same order: VAA, then DAA.
 - **Refusal.** Run `$S/capture.sh http dispatch-1 POST /api/v1/assets`. The exit code is `2` with `capture: refusing POST /api/v1/assets (Telegram send …)`, and nothing is sent.
-- **Real send, only with explicit consent.** With the developer's real Telegram values in their config, start their own server (`cd packages/server && bun run start:dev`) and call `curl -X POST http://127.0.0.1:5002/api/v1/assets`. Expect `201`, then two posts in the `reading` chat starting `[VAA Strategy]` and `[DAA Strategy]`. Capture a screenshot of the chat as proof.
+- **Real send, only with explicit consent.** With the developer's real Telegram values in their config, start their own server (`cd apps/server && bun run start:dev`) and call `curl -X POST http://127.0.0.1:5002/api/v1/assets`. Expect `201`, then two posts in the `reading` chat starting `[VAA Strategy]` and `[DAA Strategy]`. Capture a screenshot of the chat as proof.
 - **Proof.** Report `dispatch-post` and `dispatch-cron` as skipped, with the unmet precondition "no Telegram credentials on the verification instance", unless the consented real send was done.
 
 ## Gotchas

@@ -1,3 +1,0 @@
-# Client Stack
- + NextJs
- + SWR

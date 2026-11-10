@@ -23,6 +23,7 @@
     "prisma:push": "bun run write:env && bun --env-file=.env x --bun prisma db push",
     "build": "bun ./scripts/build.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "dev": "bun run start:dev",
     "start": "bun src/main.ts",
     "start:dev": "bun run write:env && bun --watch src/main.ts",
     "start:prod": "bun dist/main.js",

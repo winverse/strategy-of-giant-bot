@@ -1,6 +1,6 @@
 ---
 name: verify-allocation-rules
-description: Check that the VAA and DAA buy decisions in giants-strategy-bot follow the strategy rules for every generated set of momentum scores, not just the hand-picked spec cases. Use before and after any change to packages/server/src/strategy/allocation/ (vaa.ts, daa.ts, select.ts), src/strategy/report/message.ts, tickersByStrategy in src/strategy/tickers.ts, twoDecimalPoint in src/common/utils/number.ts, or the strategy rules in README.md, and whenever the Telegram report's "what to buy" looks wrong.
+description: Check that the VAA and DAA buy decisions in giants-strategy-bot follow the strategy rules for every generated set of momentum scores, not just the hand-picked spec cases. Use before and after any change to apps/server/src/strategy/allocation/ (vaa.ts, daa.ts, select.ts), src/strategy/report/message.ts, tickersByStrategy in src/strategy/tickers.ts, twoDecimalPoint in src/common/utils/number.ts, or the strategy rules in README.md, and whenever the Telegram report's "what to buy" looks wrong.
 ---
 
 # Verify the VAA/DAA allocation rules
@@ -13,14 +13,14 @@ description: Check that the VAA and DAA buy decisions in giants-strategy-bot fol
 
 ## Tool and why
 
-TypeScript has no verifier that runs on the code itself, so this is **property-based testing of the real code**, not a proof. [fast-check](https://fast-check.dev) `4.10.2` (pinned exactly as a dev dependency in `packages/server/package.json`) generates momentum scores and runs the real `allocateVAA`/`allocateDAA` and `vaaMessage`/`daaMessage` functions on each set. The test then checks every decision against the rules above. On a failure, fast-check shrinks the input to a minimal counterexample.
+TypeScript has no verifier that runs on the code itself, so this is **property-based testing of the real code**, not a proof. [fast-check](https://fast-check.dev) `4.10.2` (pinned exactly as a dev dependency in `apps/server/package.json`) generates momentum scores and runs the real `allocateVAA`/`allocateDAA` and `vaaMessage`/`daaMessage` functions on each set. The test then checks every decision against the rules above. On a failure, fast-check shrinks the input to a minimal counterexample.
 
 The score generator is biased toward the cases that break this kind of code: exact `0`, ties between tickers, and negatives. It mixes integers in `[-3, 3]` with two-decimal values in `[-300, 300]`. Each ticker gets one score shared across its groups, as in production (DAA's `VWO` is canary and offense, `LQD` is offense and defense). Ticker universes come from the real `tickersByStrategy`.
 
 ## Run it
 
 ```sh
-cd packages/server && bun test src/strategy/allocation/allocation.property.spec.ts
+cd apps/server && bun test src/strategy/allocation/allocation.property.spec.ts
 ```
 
 It takes about 1 s and runs 20,000 cases per strategy. `ALLOCATION_RUNS=200000` runs a deeper sweep. It also runs as part of plain `bun test`.
@@ -69,20 +69,20 @@ Covered files, with the git blob each was last confirmed against (`git hash-obje
 
 | Path | Blob confirmed | What is relied on |
 | --- | --- | --- |
-| `packages/server/src/strategy/allocation/vaa.ts` | `9c9ed723638d621a617346f95676928002a11195` | `allocateVAA` |
-| `packages/server/src/strategy/allocation/daa.ts` | `6d70de58a8c4700c5c4741cf95c4528061731ecb` | `allocateDAA` |
-| `packages/server/src/strategy/allocation/select.ts` | `f820c9cd6ea21f5d447dff636dc5985fff7f1781` | `findGroup`, `topByScore` |
-| `packages/server/src/strategy/report/message.ts` | `583038cfdc5fe28c0be8f324956f2b41db3e9d42` | `vaaMessage`, `daaMessage` lines |
-| `packages/server/src/strategy/tickers.ts` | `7d3abd7e3faa2089328ff16d0a3d5c88fb7d2441` | `tickersByStrategy` group names and members |
-| `packages/server/src/common/utils/number.ts` | `164f2a7abcba03b1c5ebcdc0b0e064931f6fac66` | `twoDecimalPoint` |
-| `packages/server/src/strategy/allocation/allocation.property.spec.ts` | `1f4352c6d45a5e219e49f20651449c4e0cf2b7e8` | the property itself |
+| `apps/server/src/strategy/allocation/vaa.ts` | `9c9ed723638d621a617346f95676928002a11195` | `allocateVAA` |
+| `apps/server/src/strategy/allocation/daa.ts` | `6d70de58a8c4700c5c4741cf95c4528061731ecb` | `allocateDAA` |
+| `apps/server/src/strategy/allocation/select.ts` | `f820c9cd6ea21f5d447dff636dc5985fff7f1781` | `findGroup`, `topByScore` |
+| `apps/server/src/strategy/report/message.ts` | `583038cfdc5fe28c0be8f324956f2b41db3e9d42` | `vaaMessage`, `daaMessage` lines |
+| `apps/server/src/strategy/tickers.ts` | `7d3abd7e3faa2089328ff16d0a3d5c88fb7d2441` | `tickersByStrategy` group names and members |
+| `apps/server/src/common/utils/number.ts` | `164f2a7abcba03b1c5ebcdc0b0e064931f6fac66` | `twoDecimalPoint` |
+| `apps/server/src/strategy/allocation/allocation.property.spec.ts` | `1f4352c6d45a5e219e49f20651449c4e0cf2b7e8` | the property itself |
 
 Sync point: confirmed 2026-11-10 on HEAD `a4a78e8`, with the spec and all 10 mutants re-run. The covered files last changed in `131c01d`, which regrouped the server by domain (`report.service.ts` split into `allocation/vaa.ts`, `allocation/daa.ts` and `report/message.ts`; group `deffense` renamed `defense`). For that move, the new functions were compared with the old `ReportService` on 10,000 generated score sets: same decisions and the same message text.
 
 Check for drift:
 
 ```sh
-git hash-object packages/server/src/strategy/allocation/vaa.ts packages/server/src/strategy/allocation/daa.ts packages/server/src/strategy/allocation/select.ts packages/server/src/strategy/report/message.ts packages/server/src/strategy/tickers.ts packages/server/src/common/utils/number.ts packages/server/src/strategy/allocation/allocation.property.spec.ts
+git hash-object apps/server/src/strategy/allocation/vaa.ts apps/server/src/strategy/allocation/daa.ts apps/server/src/strategy/allocation/select.ts apps/server/src/strategy/report/message.ts apps/server/src/strategy/tickers.ts apps/server/src/common/utils/number.ts apps/server/src/strategy/allocation/allocation.property.spec.ts
 ```
 
 If a hash differs, read the diff of that file against the rules table. Run the spec and the mutant script. Only after you confirm the rules still describe the code, update the blob (and the HEAD and date on the sync line) in this table. Never update the record just because the tests pass.

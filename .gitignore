@@ -1,4 +1,5 @@
 node_modules
+.turbo
 
 # verification runs (.claude/skills/verify-giants-api)
 .verify/

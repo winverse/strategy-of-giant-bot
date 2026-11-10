@@ -8,7 +8,7 @@
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-const server = path.resolve(import.meta.dir, '../../../../packages/server');
+const server = path.resolve(import.meta.dir, '../../../../apps/server');
 const strategyDir = path.join(server, 'src/strategy');
 const spec = 'src/strategy/allocation/allocation.property.spec.ts';
 

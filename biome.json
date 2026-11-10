@@ -12,7 +12,9 @@
       "**/*.js",
       "**/*.jsx",
       "!**/dist",
-      "!**/.next"
+      "!**/.next",
+      "!**/styled-system",
+      "!**/next-env.d.ts"
     ]
   },
   "formatter": {
@@ -50,5 +52,17 @@
         "organizeImports": "off"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": [".claude/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noUndeclaredEnvVars": "off"
+          }
+        }
+      }
+    }
+  ]
 }

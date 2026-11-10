@@ -1,25 +1,35 @@
 {
   "name": "giants-strategy-bot",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.4",
   "workspaces": [
+    "apps/*",
     "packages/*"
   ],
   "author": "SangHyun <public.winverse@gmail.com>",
-  "private": true,
   "license": "MIT License",
-  "keywords": ["quant", "investments", "VAA", "DAA"],
+  "keywords": [
+    "quant",
+    "investments",
+    "VAA",
+    "DAA"
+  ],
   "scripts": {
-    "server:dev": "bun run --filter server start:dev",
-    "server:test": "bun run --filter server test",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "server:dev": "turbo run dev --filter=server",
+    "web:dev": "turbo run dev --filter=web",
     "prisma:generate": "bun run --filter server prisma:generate",
     "prisma:push": "bun run --filter server prisma:push",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check ."
   },
-  "dependencies": {
-    "date-fns": "^2.28.0"
-  },
   "devDependencies": {
-    "@biomejs/biome": "2.6.6"
+    "@biomejs/biome": "2.6.6",
+    "turbo": "^2.11.10"
   }
 }

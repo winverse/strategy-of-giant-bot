@@ -38,19 +38,36 @@
 # Stack
 
 ## Frontend
- - nextJS
+ - Next.js 16 (App Router, React Compiler, Cache Components)
+ - Panda CSS
 
 ## Backend
- - NestJS
- - Fastify
- - Prisma
+ - NestJS 12 on Fastify 5
+ - Prisma 7 (PostgreSQL)
 
 ## Data
  - [Equibles](https://equibles.com): stock market data API
 
+## Tooling
+ - Bun (실행, 패키지 관리, 테스트)
+ - Turborepo: `apps/server`, `apps/web`
+ - TypeScript 7, Biome
+
+# Development
+
+```sh
+bun install
+bun run dev        # 서버와 웹 (Turborepo)
+bun run test       # 서버 테스트
+bun run build      # dist/main.js와 Next.js 빌드
+bun run check      # Biome
+```
+
+서버는 `apps/server/config/development.ts`를 읽는다(gitignore됨. `config/default.ts`를 복사해 값을 채운다).
+
 # Server structure
 
-`packages/server/src`는 도메인별로 나눈다.
+`apps/server/src`는 도메인별로 나눈다.
 
 - `strategy/`: 모멘텀 점수, VAA·DAA 배분, 텔레그램 리포트, HTTP 경로, 예약 작업
 - `price/`: Equibles 가격과 하루 단위 캐시
@@ -60,7 +77,7 @@
 
 - 도메인 안의 하위 폴더(`allocation/`, `momentum/`, `report/`)에는 함수만 둔다. DI, DB, API 호출, 현재 시각 읽기는 넣지 않는다. Nest 파일(`*.module.ts`, `*.controller.ts`, `*.service.ts`, `*.repository.ts`, `*.client.ts`)은 도메인 폴더 바로 아래에 둔다.
 - 다른 도메인의 코드는 그 도메인의 service와 타입으로만 쓴다.
-- 단위 테스트는 코드 옆에 둔다(`vaa.ts` → `vaa.spec.ts`). HTTP 테스트와 공용 가짜 데이터는 `packages/server/test/`에 둔다. 테스트 설명은 한글로 쓴다.
+- 단위 테스트는 코드 옆에 둔다(`vaa.ts` → `vaa.spec.ts`). HTTP 테스트와 공용 가짜 데이터는 `apps/server/test/`에 둔다. 테스트 설명은 한글로 쓴다.
 - `bun test`는 모든 테스트를, `bun run test:unit`과 `bun run test:e2e`는 한쪽만 돌린다.
 
 # Milestone

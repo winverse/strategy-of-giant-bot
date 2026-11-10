@@ -6,7 +6,7 @@ set -euo pipefail
 
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="$(cd "$SKILL_DIR/../../.." && pwd)"
-SERVER="$REPO/packages/server"
+SERVER="$REPO/apps/server"
 BASE="$REPO/.verify/giants-api"
 RUN="$BASE/run"
 API_PORT="${VERIFY_API_PORT:-5099}"
@@ -23,8 +23,8 @@ done
 for port in "$API_PORT" "$PG_PORT"; do
   lsof -iTCP:"$port" -sTCP:LISTEN -n -P >/dev/null 2>&1 && die "port $port is in use; pick others with VERIFY_API_PORT / VERIFY_PG_PORT"
 done
-[ -f "$SERVER/config/development.ts" ] || die "missing packages/server/config/development.ts (holds the Equibles key)"
-[ -d "$REPO/node_modules/.prisma/client" ] || die "Prisma client not generated; run: cd packages/server && bun run prisma:generate"
+[ -f "$SERVER/config/development.ts" ] || die "missing apps/server/config/development.ts (holds the Equibles key)"
+[ -d "$REPO/node_modules/.prisma/client" ] || die "Prisma client not generated; run: cd apps/server && bun run prisma:generate"
 
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 EVIDENCE="$BASE/evidence/$STAMP"
@@ -54,10 +54,10 @@ echo "launch: prisma db push"
   || die "prisma db push failed; see $RUN/prisma.log (then run cleanup.sh)"
 
 echo "launch: server on 127.0.0.1:$API_PORT"
-# cwd must be packages/server: Bun reads tsconfig.json from the cwd, and without its
+# cwd must be apps/server: Bun reads tsconfig.json from the cwd, and without its
 # emitDecoratorMetadata Nest cannot inject services. Side effects of that cwd: the
-# app's winston files go to packages/server/logs/ (gitignored), and Bun loads
-# packages/server/.env if present, though the variables set here take precedence.
+# app's winston files go to apps/server/logs/ (gitignored), and Bun loads
+# apps/server/.env if present, though the variables set here take precedence.
 (
   cd "$SERVER"
   NODE_ENV=development PORT="$API_PORT" DATABASE_URL="$DATABASE_URL" \

@@ -1,11 +1,11 @@
 ---
 name: verify-giants-api
-description: Launch an isolated instance of the giants-strategy-bot API (packages/server, NestJS on Bun with Postgres and live Equibles prices), drive its HTTP endpoints the way the Telegram report is produced, and capture proof. Use to confirm that a change to the server (strategy reports, momentum scores, price fetching or caching, config, routing) works in the running app, not just in unit tests.
+description: Launch an isolated instance of the giants-strategy-bot API (apps/server, NestJS on Bun with Postgres and live Equibles prices), drive its HTTP endpoints the way the Telegram report is produced, and capture proof. Use to confirm that a change to the server (strategy reports, momentum scores, price fetching or caching, config, routing) works in the running app, not just in unit tests.
 ---
 
 # Verify the giants-strategy-bot API
 
-The user-facing product is the **Telegram report**: the server computes VAA/DAA momentum scores from Equibles month-end prices and posts "what to buy" text to a Telegram chat. The HTTP API in `packages/server` is the surface you drive. `GET /api/v1/assets/reports` returns the exact text the bot posts. `packages/client` is the untouched create-next-app placeholder, with no product surface.
+The user-facing product is the **Telegram report**: the server computes VAA/DAA momentum scores from Equibles month-end prices and posts "what to buy" text to a Telegram chat. The HTTP API in `apps/server` is the surface you drive. `GET /api/v1/assets/reports` returns the exact text the bot posts. `apps/web` is a Next.js setup with no screens yet, so it has no product surface to drive.
 
 All commands run from the repo root. Helpers live in `.claude/skills/verify-giants-api/scripts/` (below, `S=.claude/skills/verify-giants-api/scripts`).
 
@@ -20,14 +20,14 @@ From an empty state this:
 
 1. Runs `initdb` for a throwaway Postgres in `.verify/giants-api/run/pgdata` on `127.0.0.1:$VERIFY_PG_PORT`, with trust auth for user `verify` and database `giants_verify`.
 2. Runs `bunx --bun prisma db push` into it. That is the whole schema: one `Tickers` table, no seed data. The database is new and empty, so the push needs no `--accept-data-loss`. Prisma 7 refuses that flag from an AI agent without the user's consent, so keep it out.
-3. Starts the real server, `bun src/main.ts` from `packages/server`, with `NODE_ENV=development` on `$VERIFY_API_PORT`.
+3. Starts the real server, `bun src/main.ts` from `apps/server`, with `NODE_ENV=development` on `$VERIFY_API_PORT`.
 4. Waits until the log says `Server is Running` and HTTP answers. That takes about 5 s.
 
 It prints `launch: ready at http://127.0.0.1:5099 (evidence -> <dir>)` and records ports, PIDs and the evidence dir in `.verify/giants-api/run/state.env`. It refuses if an instance already exists or a port is taken.
 
-**Why the preload.** `src/config/configuration.ts` loads `#env/development` (the `imports` map in `packages/server/package.json` resolves it to `config/development.ts`) unless `NODE_ENV` is `production` or `test`. The checkout's `config/development.ts` has empty Telegram and database values, and the server's Joi config check rejects them, so `bun run start:dev` cannot start. `scripts/config-preload.ts` (a `bun --preload` plugin) changes only what Bun loads for that file. It keeps the developer's values, including the Equibles key, points `database` at the throwaway Postgres, and fills Telegram with `verify-placeholder`. The file on disk is never written, and no product code changes. The plugin matches the resolved file path, so it works through the `#env/*` alias. If launch dies with `config-preload: expected exactly one "export const config ="`, the config file changed shape. Update the preload. If it dies with `config validate failed`, the preload did not apply: check that `configuration.ts` still loads `config/development.ts` for `NODE_ENV=development`.
+**Why the preload.** `src/config/configuration.ts` loads `#env/development` (the `imports` map in `apps/server/package.json` resolves it to `config/development.ts`) unless `NODE_ENV` is `production` or `test`. The checkout's `config/development.ts` has empty Telegram and database values, and the server's Joi config check rejects them, so `bun run start:dev` cannot start. `scripts/config-preload.ts` (a `bun --preload` plugin) changes only what Bun loads for that file. It keeps the developer's values, including the Equibles key, points `database` at the throwaway Postgres, and fills Telegram with `verify-placeholder`. The file on disk is never written, and no product code changes. The plugin matches the resolved file path, so it works through the `#env/*` alias. If launch dies with `config-preload: expected exactly one "export const config ="`, the config file changed shape. Update the preload. If it dies with `config validate failed`, the preload did not apply: check that `configuration.ts` still loads `config/development.ts` for `NODE_ENV=development`.
 
-Requirements: the Postgres.app tools (`initdb`, `pg_ctl`, `createdb`, `psql`, `pg_isready`) on `PATH`, plus `bun`, `jq`, `curl` and `lsof`. The Prisma client must be generated (`node_modules/.prisma/client`), and `packages/server/config/development.ts` must hold a working `financeApiKey`.
+Requirements: the Postgres.app tools (`initdb`, `pg_ctl`, `createdb`, `psql`, `pg_isready`) on `PATH`, plus `bun`, `jq`, `curl` and `lsof`. The Prisma client must be generated (`node_modules/.prisma/client`), and `apps/server/config/development.ts` must hold a working `financeApiKey`.
 
 ## Doctor
 
@@ -83,8 +83,8 @@ This stops the server and Postgres by recorded PID and data dir (never by proces
 
 - One instance per checkout, since state lives in `.verify/giants-api/run`. A second checkout can run side by side with different `VERIFY_API_PORT` and `VERIFY_PG_PORT`. The developer's own Postgres on 5432 and server on 5002 are never touched.
 - Side effects outside `.verify/`:
-  - The app's winston logger writes to `packages/server/logs/` (gitignored). The server must run from `packages/server`, because Bun reads `tsconfig.json` from the cwd and without its decorator metadata Nest's dependency injection fails.
-  - Bun loads `packages/server/.env` if it exists, but the `PORT` and `DATABASE_URL` set by `launch.sh` win.
+  - The app's winston logger writes to `apps/server/logs/` (gitignored). The server must run from `apps/server`, because Bun reads `tsconfig.json` from the cwd and without its decorator metadata Nest's dependency injection fails.
+  - Bun loads `apps/server/.env` if it exists, but the `PORT` and `DATABASE_URL` set by `launch.sh` win.
 - Each fresh instance re-fetches prices from Equibles with the developer's key: 7 requests for VAA, plus 10 more for DAA's other tickers. Repeat requests the same day hit the cache.
 
 ## Helpers

@@ -38,19 +38,36 @@ This project uses month-end, dividend-adjusted closing prices, and rebalances at
 # Stack
 
 ## Frontend
- - nextJS
+ - Next.js 16 (App Router, React Compiler, Cache Components)
+ - Panda CSS
 
 ## Backend
- - NestJS
- - Fastify
- - Prisma
+ - NestJS 12 on Fastify 5
+ - Prisma 7 (PostgreSQL)
 
 ## Data
  - [Equibles](https://equibles.com): stock market data API
 
+## Tooling
+ - Bun (runtime, package manager, test runner)
+ - Turborepo: `apps/server`, `apps/web`
+ - TypeScript 7, Biome
+
+# Development
+
+```sh
+bun install
+bun run dev        # server and web (Turborepo)
+bun run test       # server tests
+bun run build      # dist/main.js and the Next.js build
+bun run check      # Biome
+```
+
+The server reads `apps/server/config/development.ts` (gitignored; copy `config/default.ts` and fill it in).
+
 # Server structure
 
-`packages/server/src` is grouped by domain.
+`apps/server/src` is grouped by domain.
 
 - `strategy/`: momentum scores, VAA/DAA allocation, the Telegram report, HTTP routes and the schedule
 - `price/`: Equibles prices and their daily cache
@@ -60,7 +77,7 @@ Rules:
 
 - Inside a domain, subfolders (`allocation/`, `momentum/`, `report/`) hold plain functions only: no dependency injection, database, API calls or current-time reads. Nest files (`*.module.ts`, `*.controller.ts`, `*.service.ts`, `*.repository.ts`, `*.client.ts`) sit directly in the domain folder.
 - A domain uses another domain only through its service and types.
-- Unit tests sit next to the code (`vaa.ts` → `vaa.spec.ts`). HTTP tests and shared fixtures live in `packages/server/test/`. Test descriptions are written in Korean.
+- Unit tests sit next to the code (`vaa.ts` → `vaa.spec.ts`). HTTP tests and shared fixtures live in `apps/server/test/`. Test descriptions are written in Korean.
 - `bun test` runs every test. `bun run test:unit` and `bun run test:e2e` run one kind.
 
 # Milestone

@@ -1,6 +1,6 @@
 // Verification scaffolding, loaded with `bun --preload` by launch.sh only.
 // The server reads its config by requiring #env/development (src/config/configuration.ts),
-// which resolves to packages/server/config/development.ts, and Joi rejects that
+// which resolves to apps/server/config/development.ts, and Joi rejects that
 // file while Telegram and database values are empty. This
 // plugin changes only what Bun hands to the server: it keeps the developer's
 // real values (the Equibles key), points the database at the throwaway Postgres,
@@ -17,7 +17,7 @@ plugin({
   name: 'verify-giants-api-config',
   setup(build) {
     build.onLoad(
-      { filter: /\/packages\/server\/config\/development\.ts$/ },
+      { filter: /\/apps\/server\/config\/development\.ts$/ },
       (args) => {
         const source = readFileSync(args.path, 'utf8');
         const marker = 'export const config =';
