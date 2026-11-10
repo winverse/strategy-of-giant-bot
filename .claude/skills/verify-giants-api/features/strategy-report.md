@@ -18,6 +18,7 @@ The strategy report is the Korean text the bot posts to Telegram. For VAA it nam
 
 Preconditions:
 
+- `$S/quota.sh` exits 0 (a fresh instance spends 17 Equibles requests).
 - A fresh instance from `$S/launch.sh`, and `$S/doctor.sh` exits 0 showing `0 cached rows`.
 - `S=.claude/skills/verify-giants-api/scripts` in the shell.
 
@@ -33,9 +34,10 @@ Preconditions:
 
 ## Gotchas
 
-- `strategy` is case-insensitive on this route too (`?strategy=vaa` works). A missing, empty or unknown `strategy` returns `400 BAD_REQUEST`.
-- A non-HTTP error in this route reaches the client as a plain-text `500`, and `server.log` shows `FST_ERR_BAD_STATUS_CODE ... invalid status code: undefined`. Read the stack above it for the real cause. To reproduce on a throwaway instance, empty one cached row (`update "Tickers" set raw = '{}' where ticker = 'AGG'` in its Postgres) and request the VAA report: the log shows `TypeError ... base.adjustedClose`.
+- `strategy` is case-insensitive on this route too (`?strategy=vaa` works). A missing, empty, repeated (`?strategy=VAA&strategy=DAA`) or unknown `strategy` returns `400 BAD_REQUEST`.
+- With the Equibles daily quota spent, the first report request on a fresh instance returns `500` with `"message": "Equibles <TICKER>: Request failed with status code 429"` in about 1 s instead of `200` (see `price-cache.md`).
+- A non-HTTP error in this route reaches the client as a JSON `500` whose `message` is the original error, and `server.log` has its stack. That is the verification instance's `NODE_ENV=development`; with `NODE_ENV=production` the client gets `"message": "Internal server error"` (`clientMessage` in `src/common/filters/http-exception.filter.ts`, covered by its spec) while the log keeps the original. To reproduce on a throwaway instance whose VAA tickers are cached, empty one row (`update "Tickers" set raw = '{}' where ticker = 'AGG'` in its Postgres) and request the VAA report: the body is `{"statusCode":500,"message":"undefined is not an object (evaluating 'base.adjustedClose')"}`. Older evidence shows a plain-text `500` with `FST_ERR_BAD_STATUS_CODE` in the log instead.
 - The DAA weight line rounds each offense slice to two decimals, so six picks print `16.67%` each (100.02% total). That is not a failure.
-- Momentum scores weight each period's unrounded return and round only the weighted value (`src/strategy/momentum/score.ts`), so a recompute with the README formula matches to two decimals (IEF 31.93 on 2026-11-10). Evidence from before commit `564d097` rounded first and drifts by up to about 0.1 (IEF 31.97 then).
+- Momentum scores weight each period's unrounded return and round only the weighted value (`src/strategy/momentum/score.ts`), so a recompute with the README formula matches within two-decimal rounding (IEF 31.93 both ways on 2026-11-10). Each weighted term and their sum are rounded separately, so a rare 0.01–0.02 difference is not a failure. Evidence from before commit `564d097` rounded first and drifts by up to about 0.1 (IEF 31.97 then).
 - Ties: when two scores are equal, the report and `check-report.sh` keep the earlier ticker in the group's list order. If they disagree only on a tie, check whether the tie-break changed.
 - `날짜` is the server's local date, and `기준일` comes from the price data, so a run just after midnight or on the 1st of a month can shift both.

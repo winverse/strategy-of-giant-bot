@@ -13,8 +13,11 @@ All commands run from the repo root. Helpers live in `.claude/skills/verify-gian
 
 ```sh
 S=.claude/skills/verify-giants-api/scripts
+$S/quota.sh           # Equibles requests left today; exit 1 below 17 (a full pass)
 $S/launch.sh          # optional: VERIFY_API_PORT=5099 VERIFY_PG_PORT=55432 (defaults)
 ```
+
+Run `quota.sh` first. It spends one request and stops you before a pass the daily quota can't finish (see Isolation and cost).
 
 From an empty state this:
 
@@ -86,16 +89,19 @@ This stops the server and Postgres by recorded PID and data dir (never by proces
   - The app's winston logger writes to `apps/server/logs/` (gitignored). The server must run from `apps/server`, because Bun reads `tsconfig.json` from the cwd and without its decorator metadata Nest's dependency injection fails.
   - Bun loads `apps/server/.env` if it exists, but the `PORT` and `DATABASE_URL` set by `launch.sh` win.
 - Each fresh instance re-fetches prices from Equibles with the developer's key: 7 requests for VAA, plus 10 more for DAA's other tickers. Repeat requests the same day hit the cache.
+- Equibles allows **100 requests per key per day** (`X-RateLimit-Limit: 100`, observed 2026-11-10), reset at 00:00 UTC (09:00 KST). That is about five full passes a day, shared with the developer's own server. Once it is spent, a 429 is not retried (`isTransientEquiblesError` in `src/price/equibles.client.ts`): each uncached ticker makes one rejected call, and the request returns `500 {"statusCode":500,"message":"Equibles <TICKER>: Request failed with status code 429"}` in about 1 s with nothing cached. Stop at the first 429 and report the rest of the pass as blocked until the reset.
+- A failed fetch is logged as an `EquiblesError` (ticker, status, message) without the axios request, so `server.log` does not hold the API key (checked 2026-11-10). Older builds dumped the request with its `Authorization: Bearer` header. `cleanup.sh` still masks bearer tokens when it copies logs into the evidence dir, as a safeguard.
 
 ## Helpers
 
 | Script | Invocation | Purpose |
 | --- | --- | --- |
+| `quota.sh` | `$S/quota.sh [needed]` | one Equibles request; print today's remaining quota, exit 1 below `needed` (17) |
 | `launch.sh` | `$S/launch.sh` | start Postgres + schema + server, wait for ready |
 | `doctor.sh` | `$S/doctor.sh` | read-only health check of the instance |
 | `capture.sh` | `$S/capture.sh http <label> <METHOD> <path>` / `$S/capture.sh db <label>` | drive one request or snapshot the cache, saving proof |
 | `check-report.sh` | `$S/check-report.sh VAA\|DAA <scores-label> <report-label>` | check report text against the README rules |
-| `cleanup.sh` | `$S/cleanup.sh` | tear down, keep evidence |
+| `cleanup.sh` | `$S/cleanup.sh` | tear down, keep evidence (bearer tokens masked in copied logs) |
 | `config-preload.ts` | used by `launch.sh` | swap in verification config without writing the config file |
 
 Use `/pstack:maintain-verification-skill` to keep this skill and its feature map in step with the app.

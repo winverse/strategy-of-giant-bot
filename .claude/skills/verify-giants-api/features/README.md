@@ -4,6 +4,7 @@ This directory is the maintained source for verifying the user-facing behavior o
 
 ## Baseline preconditions
 
+- Run `.claude/skills/verify-giants-api/scripts/quota.sh` and require exit 0: at least 17 of the 100 daily Equibles requests are left.
 - Launch with `.claude/skills/verify-giants-api/scripts/launch.sh` and require `launch: ready`.
 - Run `.claude/skills/verify-giants-api/scripts/doctor.sh` and require exit 0.
 - A fresh instance has an empty `Tickers` cache. The first request for a ticker on a given day fetches live Equibles prices.

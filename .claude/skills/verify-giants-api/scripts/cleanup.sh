@@ -28,8 +28,10 @@ if [ -f "$RUN/pgdata/postmaster.pid" ]; then
 fi
 
 mkdir -p "$EVIDENCE/logs"
+# A failed Equibles fetch makes the server dump the axios request, Authorization
+# header included, so mask bearer tokens on the way into the kept evidence.
 for log in server.log postgres.log prisma.log initdb.log; do
-  [ -f "$RUN/$log" ] && cp "$RUN/$log" "$EVIDENCE/logs/$log"
+  [ -f "$RUN/$log" ] && sed -E 's/(Bearer )[A-Za-z0-9._~+\/=-]+/\1<redacted>/g' "$RUN/$log" >"$EVIDENCE/logs/$log"
 done
 
 rm -rf "$RUN"

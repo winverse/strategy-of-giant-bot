@@ -28,7 +28,9 @@ Preconditions:
 
 ## Gotchas
 
-- The defense group is `defense`, and each outline has `from`, `to`, `rateOfReturn`, `adjustedReturn`. Before 2026-11-10 the API spelled them `deffense` and `rateOfRetrun`, so older evidence uses those keys.
+- The defense group is `defense`, and each outline has `from`, `to`, `rateOfReturn`, `adjustedReturn`. Before commit `131c01d` (2026-11-10 17:33 KST) the API spelled them `deffense` and `rateOfRetrun`, so evidence from before then uses those keys.
 - In DAA, VWO is in both `canary` and `offense`, and LQD in both `offense` and `defense`. Each appearance is its own entry with the same score.
-- A missing or empty `strategy` also returns `400 BAD_REQUEST`.
+- A missing, empty or repeated `strategy` also returns `400 BAD_REQUEST`. A repeated one (`?strategy=VAA&strategy=DAA`) arrives as an array; older evidence shows it as a plain-text `500`.
+- `adjustedReturn` is the weighted *unrounded* return, rounded once (`src/strategy/momentum/score.ts`), so `rateOfReturn × weight` from the JSON can differ from `adjustedReturn` in the last digit.
+- A month-end is looked up at most 10 days back. If no price row falls in that window, `src/strategy/momentum/month-end.ts` silently uses the oldest row instead, so a `from` date far from a month-end means missing price data, not a date bug.
 - On a fresh cache the first call takes 1–3 s per strategy (live Equibles fetch). Later calls take milliseconds.
