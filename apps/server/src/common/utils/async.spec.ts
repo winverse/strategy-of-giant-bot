@@ -26,4 +26,11 @@ describe('retry', () => {
     await expect(retry(2, cb, 0)).rejects.toThrow('fail 3');
     expect(calls.count).toBe(3);
   });
+
+  it('shouldRetry가 거절한 오류는 다시 부르지 않고 바로 던진다', async () => {
+    const { calls, cb } = failFirst(10);
+
+    await expect(retry(5, cb, 0, () => false)).rejects.toThrow('fail 1');
+    expect(calls.count).toBe(1);
+  });
 });

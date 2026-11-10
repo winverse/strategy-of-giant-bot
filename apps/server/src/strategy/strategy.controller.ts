@@ -8,12 +8,12 @@ import { StrategyService } from '#strategy/strategy.service';
 export class StrategyController {
   constructor(private readonly strategyService: StrategyService) {}
   @Get('/')
-  async getMomentumScores(@Query('strategy') strategy: string) {
+  async getMomentumScores(@Query('strategy') strategy: unknown) {
     return await this.strategyService.getMomentumScores(strategy);
   }
 
   @Get('/reports')
-  async getReport(@Query('strategy') strategy: string) {
+  async getReport(@Query('strategy') strategy: unknown) {
     return await this.strategyService.getReport(strategy);
   }
 

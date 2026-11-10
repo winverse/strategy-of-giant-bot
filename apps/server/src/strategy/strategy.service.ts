@@ -31,16 +31,19 @@ export class StrategyService {
     private readonly priceService: PriceService,
     private readonly telegramService: TelegramService,
   ) {}
-  // Accept 'vaa' or 'VAA'; a missing or unknown strategy is a bad request (400)
-  private toStrategy(strategy?: string): Strategy {
-    const upperStrategy = strategy?.toUpperCase() as Strategy;
+  // Accept 'vaa' or 'VAA'; a missing, repeated (?strategy=A&strategy=B arrives
+  // as an array) or unknown strategy is a bad request (400)
+  private toStrategy(strategy?: unknown): Strategy {
+    const upperStrategy = (
+      typeof strategy === 'string' ? strategy.toUpperCase() : undefined
+    ) as Strategy;
     if (!strategies.includes(upperStrategy)) {
       throw new BadRequestException(BAD_REQUEST);
     }
 
     return upperStrategy;
   }
-  async getMomentumScores(strategy?: string): Promise<MomentumScoreSummary[]> {
+  async getMomentumScores(strategy?: unknown): Promise<MomentumScoreSummary[]> {
     const upperStrategy = this.toStrategy(strategy);
 
     try {
@@ -66,7 +69,7 @@ export class StrategyService {
       throw new InternalServerErrorException(error);
     }
   }
-  async getReport(strategy?: string): Promise<string> {
+  async getReport(strategy?: unknown): Promise<string> {
     const upperStrategy = this.toStrategy(strategy);
     const summary = await this.getMomentumScores(upperStrategy);
 

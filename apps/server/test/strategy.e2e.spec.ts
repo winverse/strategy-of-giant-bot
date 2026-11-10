@@ -109,6 +109,7 @@ describe('/api/v1/assets (HTTP)', () => {
     ['전략이 없음', ''],
     ['전략이 빈 값', '?strategy='],
     ['모르는 전략', '?strategy=gtaa'],
+    ['전략이 여러 개', '?strategy=VAA&strategy=DAA'],
   ])('GET: %s이면 400', async (_, query) => {
     const res = await get(`/api/v1/assets${query}`);
 

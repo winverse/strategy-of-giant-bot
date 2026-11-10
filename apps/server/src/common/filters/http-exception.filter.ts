@@ -9,6 +9,16 @@ import { LoggerService } from '#logger/logger.service';
 import { TelegramService } from '#telegram/telegram.service';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+const INTERNAL_SERVER_ERROR = 'Internal server error';
+
+// What a client sees as the message. In production a 5xx hides the cause; the
+// log and the error chat keep the original. Elsewhere the original shows, to
+// make development easier.
+const clientMessage = (statusCode: number, message: unknown) =>
+  statusCode >= 500 && process.env.NODE_ENV === 'production'
+    ? INTERNAL_SERVER_ERROR
+    : message;
+
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   constructor(
@@ -23,8 +33,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       const exceptionResponse: any = exception.getResponse();
 
-      const statusCode =
-        exceptionResponse?.status || exceptionResponse.statusCode;
+      // The exception's own status. Its response can be a wrapped error with
+      // no status at all (new InternalServerErrorException(error)).
+      const statusCode = exception.getStatus();
       const message = exceptionResponse?.message;
       const error = exceptionResponse?.error;
 
@@ -46,18 +57,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
       console.error(exceptionResponse);
 
-      const res = {
+      reply.status(statusCode).send({
         statusCode,
-        message,
+        message: clientMessage(statusCode, message),
         error,
-      };
-
-      reply.status(statusCode).send(res);
+      });
     } else {
       console.error(exception);
+
+      const statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+      const message =
+        exception instanceof Error ? exception.message : INTERNAL_SERVER_ERROR;
+
       reply
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send('Internal server error');
+        .status(statusCode)
+        .send({ statusCode, message: clientMessage(statusCode, message) });
     }
   }
 }

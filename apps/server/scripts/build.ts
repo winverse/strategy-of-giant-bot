@@ -18,6 +18,10 @@ const result = await Bun.build({
   target: 'bun',
   sourcemap: 'linked',
   external,
+  // Bun.build otherwise bakes NODE_ENV in at build time ("development" when
+  // unset), so the bundle would ignore NODE_ENV=production at runtime and load
+  // config/development.ts. Keep it a runtime read.
+  define: { 'process.env.NODE_ENV': 'process.env.NODE_ENV' },
 });
 
 if (!result.success) {
