@@ -34,12 +34,12 @@ describe('ReportService', () => {
 
     it.each([
       [
-        'buys the best offense ticker when every offense score is plus',
+        '공격 자산 점수가 모두 플러스면 공격 자산 중 최고 점수를 산다',
         { SPY: 18.2, VEA: 5.3, VWO: 1.2, AGG: 25.7 },
         'AGG',
       ],
       [
-        'buys the best deffense ticker when any offense score is minus',
+        '공격 자산 중 하나라도 마이너스면 안전 자산 중 최고 점수를 산다',
         { SPY: 18.2, VEA: -5.3, VWO: 1.2, AGG: 25.7 },
         'IEF',
       ],
@@ -71,7 +71,7 @@ describe('ReportService', () => {
 
     it.each([
       [
-        'both canary scores are plus: top 6 offense tickers, no deffense',
+        '카나리아 둘 다 플러스: 공격 자산 상위 6개, 안전 자산 없음',
         { BND: 27.6, VWO: 1.5 },
         {
           buyingRatio: 100,
@@ -80,7 +80,7 @@ describe('ReportService', () => {
         },
       ],
       [
-        'one canary score is plus: top 3 offense tickers and the best deffense ticker',
+        '카나리아 하나만 플러스: 공격 자산 상위 3개와 최고 점수 안전 자산',
         { BND: 27.6, VWO: -106 },
         {
           buyingRatio: 50,
@@ -89,7 +89,7 @@ describe('ReportService', () => {
         },
       ],
       [
-        'no canary score is plus: only the best deffense ticker',
+        '플러스인 카나리아 없음: 최고 점수 안전 자산만',
         { BND: -3.1, VWO: -106 },
         {
           buyingRatio: 0,
@@ -114,7 +114,7 @@ describe('ReportService', () => {
       expect(totalRatio).toBeCloseTo(100, 1);
     });
 
-    it('splits the buying ratio equally and writes the base date', () => {
+    it('공격 비중을 똑같이 나누고 기준일을 적는다', () => {
       const { meta, message } = reportService.createReportForDAAStarategy(
         createSummary({ canary: { BND: 27.6, VWO: -106 }, offense, deffense }),
       );

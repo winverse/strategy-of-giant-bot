@@ -120,8 +120,9 @@ export class AssetsService {
             from: raw.date,
             to: monthEndOverview.date,
             rateOfRetrun,
+            // Weight the unrounded return, so rounding is not multiplied by 12
             adjustedReturn: this.utils.twoDecimalPoint(
-              rateOfRetrun * weightedValue,
+              returnComparedWithMonthEnd * weightedValue,
             ), // Adjustment value to take advantage of Momentum
           };
 
@@ -153,15 +154,21 @@ export class AssetsService {
       throw new InternalServerErrorException(error);
     }
   }
+  // Accept 'vaa' or 'VAA'; a missing or unknown strategy is a bad request (400)
+  private toUpperStrategy(strategy?: string): AssetsStrategy {
+    const upperStrategy = strategy?.toUpperCase() as AssetsStrategy;
+    if (!['DAA', 'VAA'].includes(upperStrategy)) {
+      throw new BadRequestException(BAD_REQUEST);
+    }
+
+    return upperStrategy;
+  }
   async getMomentumScoreByStretegy(
     strategy: AssetsStrategy,
   ): Promise<MomentumScoreSummary[]> {
-    try {
-      const upperStrategy = strategy.toUpperCase() as AssetsStrategy;
-      if (!['DAA', 'VAA'].includes(upperStrategy)) {
-        throw new BadRequestException(BAD_REQUEST);
-      }
+    const upperStrategy = this.toUpperStrategy(strategy);
 
+    try {
       const tickersByStrategy =
         this.tickersService.getTickersByStrategy(upperStrategy);
 
@@ -189,13 +196,15 @@ export class AssetsService {
     strategy: AssetsStrategy,
     summary: MomentumScoreSummary[],
   ) {
+    const upperStrategy = this.toUpperStrategy(strategy);
+
     try {
       const messageTable: Record<AssetsStrategy, any> = {
         DAA: () => this.reportService.createReportForDAAStarategy(summary),
         VAA: () => this.reportService.createReportForVAAStarategy(summary),
       };
 
-      const result: MomentumScoreReportResult = messageTable[strategy]();
+      const result: MomentumScoreReportResult = messageTable[upperStrategy]();
 
       return result.message;
     } catch (error) {

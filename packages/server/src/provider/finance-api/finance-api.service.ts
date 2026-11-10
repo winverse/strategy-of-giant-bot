@@ -40,11 +40,16 @@ export class FinanceApiService {
         },
       );
 
-      if (!data?.data?.length) {
+      // A row without a finite adjusted close would make the momentum score NaN
+      const prices = (data?.data ?? []).filter((price) =>
+        Number.isFinite(price.adjustedClose),
+      );
+
+      if (!prices.length) {
         throw new Error(NO_HISTORICAL_DATA);
       }
 
-      return data.data;
+      return prices;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

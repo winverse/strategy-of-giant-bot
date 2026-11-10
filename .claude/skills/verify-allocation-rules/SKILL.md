@@ -60,8 +60,8 @@ A failure prints the rule (`V1:` … `D6:`), a JSON detail with `scores` and the
 
 - **Covered:** `ReportService.createReportForVAAStarategy`, `createReportForDAAStarategy` and their message text, called directly with generated summaries. It uses the real `TickersService.getTickersByStrategy` universes and the real `UtilsService.twoDecimalPoint`.
 - **Bounded:** this is sampling, not exhaustion. 20,000 generated cases per strategy per run, weighted to zeros and ties. A pass means no counterexample was found in that sample.
-- **Assumed:** every momentum score is a finite number. **Not covered, and known unsafe:** a ticker whose score is `NaN`. That happens if an Equibles price row the month-end lookup picks has no `adjustedClose`, since `AssetsService.quarterlyOutline` divides by it. `NaN < 0` is false, so VAA's crash guard does not switch to defense, and the sort can even pick the `NaN` ticker (checked: offense `SPY = NaN` → VAA buys SPY).
-- **Not covered:** how scores are computed (`AssetsService` month-end picking and weighting; see `assets.service.spec.ts`), Equibles fetching, the Prisma cache, the controller's strategy casing, and Telegram delivery. Drive those with the `verify-giants-api` skill.
+- **Assumed:** every momentum score is a finite number. `FinanceApiService.getHistoricalPrice` keeps that true: it drops price rows without a finite `adjustedClose` and fails when none remain (see `finance-api.service.spec.ts`). Before that guard, a `NaN` score was possible, and it slips past VAA's crash guard because `NaN < 0` is false (checked: offense `SPY = NaN` → VAA buys SPY). This spec still does not generate `NaN`.
+- **Not covered:** how scores are computed (`AssetsService` month-end picking and weighting; see `assets.service.spec.ts`), Equibles fetching, the Prisma cache, strategy casing (`AssetsService.toUpperStrategy`), and Telegram delivery. Drive those with the `verify-giants-api` skill.
 
 ## Coverage record
 
@@ -72,9 +72,9 @@ Covered files, with the git blob each was last confirmed against (`git hash-obje
 | `packages/server/src/provider/report/report.service.ts` | `7b93ede1e12ba1e80e276f798f17e0b86b525589` | both `createReportFor…` methods, `getMomentumScoreForTickers`, message lines |
 | `packages/server/src/module/tickers/tickers.service.ts` | `db97049d3a3e32b2e6b410da5b9856665fa3e21f` | `getTickersByStrategy` group names and members |
 | `packages/server/src/provider/utils/utils.service.ts` | `01ca1afe49321c6a422c232e62f19a3a94aa3053` | `twoDecimalPoint` |
-| `packages/server/src/provider/report/report.allocation.spec.ts` | `ce03b48540531218785c2114521ff4963c44f987` | the property itself |
+| `packages/server/src/provider/report/report.allocation.spec.ts` | `0d173cd1f0b15acad959d7c3224b8124ea8f0671` | the property itself |
 
-Sync point: confirmed 2026-11-10 on HEAD `8bc3ee3` + working tree.
+Sync point: confirmed 2026-11-10 on HEAD `c33afc9` + working tree (spec text translated to Korean; rule IDs unchanged, spec and all 10 mutants re-run).
 
 Check for drift:
 

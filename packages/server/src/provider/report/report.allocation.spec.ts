@@ -1,13 +1,13 @@
-// Property check for the VAA/DAA buy decision (see .claude/skills/verify-allocation-rules).
-// Runs the real ReportService on generated momentum scores and checks every
-// decision against the strategy rules in README.md.
+// VAA/DAA 매수 판단의 속성 검사 (.claude/skills/verify-allocation-rules 참고).
+// 생성한 모멘텀 점수로 실제 ReportService를 돌리고, 모든 판단을
+// README.md의 전략 규칙과 맞춰 본다.
 import { describe, it } from 'bun:test';
 import fc from 'fast-check';
 import { MomentumScoreSummary } from '#module/assets/assets.interface';
 import { TickersService } from '#module/tickers/tickers.service';
 import { UtilsService } from '#provider/utils/utils.service';
 
-// ALLOCATION_IMPL lets the mutant runner swap in a broken copy of report.service.ts.
+// ALLOCATION_IMPL로 뮤턴트 실행기가 일부러 망가뜨린 report.service.ts 사본을 끼워 넣는다.
 const { ReportService }: typeof import('./report.service') = require(
   process.env.ALLOCATION_IMPL ?? './report.service',
 );
@@ -17,15 +17,15 @@ const NUM_RUNS = Number(process.env.ALLOCATION_RUNS ?? 20000);
 const tickersService = new TickersService({} as any);
 const reportService = new ReportService(new UtilsService(), tickersService);
 
-// Momentum scores come out of UtilsService.twoDecimalPoint, so they are finite
-// numbers with two decimals. Small integers force ties and exact zeros.
+// 모멘텀 점수는 UtilsService.twoDecimalPoint를 거치므로 소수 둘째 자리까지의
+// 유한한 수다. 작은 정수는 동점과 정확한 0을 자주 만든다.
 const score = fc.oneof(
   fc.integer({ min: -3, max: 3 }),
   fc.integer({ min: -30000, max: 30000 }).map((n) => n / 100),
 );
 
-// One score per ticker name: a ticker in two groups (DAA's VWO, LQD) has the
-// same score in both, as it does in AssetsService.getMomentumScoreByStretegy.
+// 종목마다 점수는 하나다. 두 그룹에 있는 종목(DAA의 VWO, LQD)은
+// AssetsService.getMomentumScoreByStretegy에서처럼 양쪽 점수가 같다.
 const scoresFor = (strategy: 'VAA' | 'DAA') => {
   const groups = tickersService.getTickersByStrategy(strategy);
   const names = [...new Set(Object.values(groups).flat())];
@@ -67,8 +67,8 @@ const assertThat = (condition: boolean, rule: string, detail: unknown) => {
   }
 };
 
-describe('allocation rules (property)', () => {
-  it('VAA buys the best offense ticker, or the best defense ticker once any offense score is negative', () => {
+describe('배분 규칙 (속성 검사)', () => {
+  it('VAA는 공격 자산 중 최고 점수를 사고, 공격 자산 하나라도 마이너스면 안전 자산 중 최고 점수를 산다', () => {
     fc.assert(
       fc.property(scoresFor('VAA'), (scores) => {
         const offense = groupOf('VAA', 'offense');
@@ -84,24 +84,24 @@ describe('allocation rules (property)', () => {
 
         assertThat(
           meta.isMinusMomentumScoreInOffense === anyNegative,
-          'V1: switches to defense exactly when an offense score is below 0',
+          'V1: 공격 자산 점수가 0 미만일 때만 안전 자산으로 바꾼다',
           detail,
         );
         assertThat(
           pool.includes(picked.name),
-          'V2: buys from the group that V1 chooses',
+          'V2: V1이 고른 그룹에서 산다',
           detail,
         );
         assertThat(
           scores[picked.name] === max(pool.map((name) => scores[name])),
-          'V3: buys the highest momentum score in that group',
+          'V3: 그 그룹에서 모멘텀 점수가 가장 높은 종목을 산다',
           detail,
         );
         assertThat(
           message.includes(
             `${anyNegative ? '안전' : '공격'}자산 중 구매 종목은 ${picked.name} 이며`,
           ),
-          'V4: the Telegram message names the same ticker and group',
+          'V4: 텔레그램 메시지에 같은 종목과 그룹이 나온다',
           detail,
         );
       }),
@@ -109,7 +109,7 @@ describe('allocation rules (property)', () => {
     );
   });
 
-  it('DAA sizes offense by canaries, buys the top offense tickers, and puts the rest in the best defense ticker', () => {
+  it('DAA는 카나리아로 공격 비중을 정해 공격 자산 상위 종목을 사고, 나머지는 최고 점수 안전 자산에 넣는다', () => {
     fc.assert(
       fc.property(scoresFor('DAA'), (scores) => {
         const canary = groupOf('DAA', 'canary');
@@ -129,19 +129,19 @@ describe('allocation rules (property)', () => {
         assertThat(
           meta.buyingRatio === offenseShare &&
             meta.deffenseRatio === 100 - offenseShare,
-          'D1: offense share is 50% per canary with a score above 0',
+          'D1: 점수가 0보다 큰 카나리아 하나마다 공격 비중이 50%다',
           detail,
         );
         assertThat(
           picked.length === offenseCount &&
             new Set(picked).size === picked.length &&
             picked.every((n) => offense.includes(n)),
-          'D2: buys 6, 3 or 0 distinct offense tickers for 100%, 50%, 0%',
+          'D2: 공격 비중 100%, 50%, 0%에 서로 다른 공격 자산을 6, 3, 0개 산다',
           detail,
         );
         assertThat(
           picked.every((p) => unpicked.every((u) => scores[p] >= scores[u])),
-          'D3: no unpicked offense ticker outscores a picked one',
+          'D3: 고르지 않은 공격 자산이 고른 것보다 점수가 높지 않다',
           detail,
         );
         const defensePick: string[] = meta.deffenseTickers;
@@ -151,7 +151,7 @@ describe('allocation rules (property)', () => {
             : defensePick.length === 1 &&
                 scores[defensePick[0]] ===
                   max(defense.map((name) => scores[name])),
-          'D4: the remaining share goes to the single best defense ticker',
+          'D4: 남은 비중은 최고 점수 안전 자산 하나에 간다',
           detail,
         );
 
@@ -159,7 +159,7 @@ describe('allocation rules (property)', () => {
         const total = allocations.reduce((sum, a) => sum + a.ratio, 0);
         assertThat(
           Math.abs(total - 100) <= 0.005 * allocations.length + 1e-9,
-          'D5: the printed weights add up to 100% (up to two-decimal rounding)',
+          'D5: 출력한 비중의 합이 100%다 (소수 둘째 자리 반올림 오차 허용)',
           { ...detail, total },
         );
         assertThat(
@@ -172,7 +172,7 @@ describe('allocation rules (property)', () => {
                   a.ratio === 100 - offenseShare) &&
               message.includes(`${a.name} ${a.ratio}%`),
           ) && allocations.length === picked.length + defensePick.length,
-          'D6: each offense pick gets an equal slice, defense gets the rest, and the message prints them',
+          'D6: 공격 자산은 같은 비중, 안전 자산은 나머지를 받고 메시지에 그대로 나온다',
           detail,
         );
       }),
