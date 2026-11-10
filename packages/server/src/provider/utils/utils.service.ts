@@ -33,11 +33,11 @@ export class UtilsService {
 
     const sleep = (ms) => this.sleep(ms);
     const retry = (_time, _delay, _cb) => this.retry(_time, _delay, _cb);
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       if (!cb) return;
       return cb()
         .then(resolve)
-        .catch(function (reason) {
+        .catch((reason) => {
           if (time > 0) {
             return sleep(delay as number)
               .then(retry.bind(null, time - 1, delay, cb))

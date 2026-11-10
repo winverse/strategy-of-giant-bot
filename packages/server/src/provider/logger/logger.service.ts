@@ -1,10 +1,10 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import { Injectable, LoggerService as NestLogger } from '@nestjs/common';
 import WinstonDaily from 'winston-daily-rotate-file';
 import winston from 'winston';
-import { ConfigService } from '@provider/config';
+import { ConfigService } from '#provider/config';
 import { format } from 'date-fns';
 
 @Injectable()
@@ -106,17 +106,16 @@ export class LoggerService implements NestLogger {
   }
   error(error: any) {
     this.logger.error('');
-    Object.keys(error).map((key) => {
-      if (typeof error[key] === 'object') {
-        const line = `[${[key]}]: ${JSON.stringify(error[key])}`;
+    Object.keys(error)
+      .map((key) =>
+        typeof error[key] === 'object'
+          ? `[${[key]}]: ${JSON.stringify(error[key])}`
+          : `[${[key]}]: ${error[key]}`,
+      )
+      .forEach((line) => {
         console.log(line);
         this.write(line);
-      } else {
-        const line = `[${[key]}]: ${error[key]}`;
-        console.log(line);
-        this.write(line);
-      }
-    });
+      });
   }
   rawError(error: any) {
     this.logger.error(error);

@@ -1,8 +1,8 @@
 import { Prisma, Tickers } from '@prisma/client';
-import { AssetsStrategy } from '@module/assets/assets.interface';
+import { AssetsStrategy } from '#module/assets/assets.interface';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { PrismaService } from '@provider/prisma';
-import { UsedAllTickers } from '@module/tickers/tickers.interface';
+import { PrismaService } from '#provider/prisma';
+import { UsedAllTickers } from '#module/tickers/tickers.interface';
 
 @Injectable()
 export class TickersService {

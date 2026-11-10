@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TickersService } from '@module/tickers/tickers.service';
-import { PrismaModule } from '@provider/prisma';
+import { TickersService } from '#module/tickers/tickers.service';
+import { PrismaModule } from '#provider/prisma';
 
 @Module({
   imports: [PrismaModule],

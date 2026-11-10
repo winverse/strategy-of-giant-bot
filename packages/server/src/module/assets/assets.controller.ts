@@ -1,9 +1,9 @@
-import { UtilsService } from '@provider/utils';
-import { AssetsStrategy } from '@module/assets/assets.interface';
-import { AssetsService } from '@module/assets/assets.service';
+import { UtilsService } from '#provider/utils';
+import type { AssetsStrategy } from '#module/assets/assets.interface';
+import { AssetsService } from '#module/assets/assets.service';
 import { Controller, Get, Post, Query } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { BotService } from '@provider/bot';
+import { BotService } from '#provider/bot';
 
 @Controller({
   path: '/assets',

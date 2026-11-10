@@ -1,4 +1,4 @@
-import { AssetsStrategy } from '@module/assets/assets.interface';
+import { AssetsStrategy } from '#module/assets/assets.interface';
 
 type VAATickers = {
   offense: string[];
@@ -12,8 +12,8 @@ type DAATickers = VAATickers & {
 export type TickersTypeGuard<T extends AssetsStrategy> = T extends 'VAA'
   ? VAATickers
   : T extends 'DAA'
-  ? DAATickers
-  : never;
+    ? DAATickers
+    : never;
 
 export type UsedAllTickers =
   | 'SPY'

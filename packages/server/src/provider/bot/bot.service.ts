@@ -2,8 +2,8 @@
 process.env.NTBA_FIX_319 = '1'; // don'remove
 
 import { Injectable } from '@nestjs/common';
-import { BotRoomName } from '@provider/bot/bot.interface';
-import { ConfigService } from '@provider/config';
+import { BotRoomName } from '#provider/bot/bot.interface';
+import { ConfigService } from '#provider/config';
 import TelegramBot from 'node-telegram-bot-api';
 
 @Injectable()

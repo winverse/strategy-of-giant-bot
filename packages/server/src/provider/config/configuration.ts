@@ -32,13 +32,12 @@ function configValidator(config: Config) {
   }
 }
 
-export const configuration = async () => {
+export const configuration = () => {
   const envfileName =
     process.env.NODE_ENV !== 'production' ? 'development' : 'production';
 
-  const { config }: { config: Config } = await import(
-    `../../../config/${envfileName}`
-  );
+  // Load synchronously, so the config is ready before any provider reads it
+  const { config }: { config: Config } = require(`#config/${envfileName}`);
 
   configValidator(config);
 

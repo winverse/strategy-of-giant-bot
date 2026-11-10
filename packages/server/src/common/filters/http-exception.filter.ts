@@ -5,9 +5,9 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { BotService } from '@provider/bot';
-import { LoggerService } from '@provider/logger';
-import { UtilsService } from '@provider/utils';
+import { BotService } from '#provider/bot';
+import { LoggerService } from '#provider/logger';
+import { UtilsService } from '#provider/utils';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @Catch()

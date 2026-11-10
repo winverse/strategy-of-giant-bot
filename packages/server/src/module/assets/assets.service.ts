@@ -1,22 +1,22 @@
-import { ReportService } from '@provider/report/report.service';
+import { ReportService } from '#provider/report/report.service';
 import { TickerSummary } from './assets.interface';
 import {
   AssetsStrategy,
   MomentumScoreSummary,
   QuarterlyOutline,
-} from '@module/assets/assets.interface';
+} from '#module/assets/assets.interface';
 import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { FinanceApiService } from '@provider/finance-api';
-import { RawHistoricalPrice } from '@provider/finance-api/finance-api.interface';
-import { TickersService } from '@module/tickers/tickers.service';
-import { UtilsService } from '@provider/utils';
-import { subDays, format, subMonths } from 'date-fns';
-import { BAD_REQUEST } from 'src/constants/errors/errors.contants';
-import { MomentumScoreReportResult } from '@provider/report/report.interface';
+import { FinanceApiService } from '#provider/finance-api';
+import { RawHistoricalPrice } from '#provider/finance-api/finance-api.interface';
+import { TickersService } from '#module/tickers/tickers.service';
+import { UtilsService } from '#provider/utils';
+import { subDays, format, subMonths, endOfMonth } from 'date-fns';
+import { BAD_REQUEST } from '#constants/errors/errors.contants';
+import { MomentumScoreReportResult } from '#provider/report/report.interface';
 
 @Injectable()
 export class AssetsService {
@@ -59,10 +59,9 @@ export class AssetsService {
   ): RawHistoricalPrice[] {
     try {
       if (!rawData) {
-        throw new Error('Failed load raw data from fmp');
+        throw new Error('Failed load raw data from equibles');
       }
 
-      const yesterday = subDays(new Date(), 1);
       const quarterlyBaseDate = {
         now: 0,
         monthAgo: 1,
@@ -71,25 +70,22 @@ export class AssetsService {
         yearAgo: 12,
       } as const;
 
-      return Object.values(quarterlyBaseDate)
-        .map((quarter) => subMonths(yesterday, quarter))
-        .map((date) => {
-          let data: RawHistoricalPrice | undefined = undefined;
-          let diff = 0;
-          // Find data considering closed days
-          while (!data) {
-            const adjDate = subDays(date, diff);
-            const formattedDate = format(adjDate, 'yyyy-MM-dd');
-            data = rawData.find((raw) => raw.date === formattedDate);
-            if (diff > 10) {
-              return rawData[rawData.length - 1];
-            }
+      const closedDays = Array.from({ length: 11 }, (_, diff) => diff);
 
-            if (!data) {
-              diff++;
-            }
-          }
-          return data;
+      // Momentum score uses month-end prices (rebalance at the end of every month)
+      // now: end of last month, monthAgo: end of the month before last, ...
+      return Object.values(quarterlyBaseDate)
+        .map((quarter) => endOfMonth(subMonths(new Date(), quarter + 1)))
+        .map((date) => {
+          // Find the last trading day of the month considering closed days
+          const data = closedDays
+            .map((diff) => format(subDays(date, diff), 'yyyy-MM-dd'))
+            .map((formattedDate) =>
+              rawData.find((raw) => raw.date === formattedDate),
+            )
+            .find((raw) => raw !== undefined);
+
+          return data ?? rawData[rawData.length - 1];
         });
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -100,13 +96,14 @@ export class AssetsService {
       return rawData.reduce<QuarterlyOutline[]>(
         (outlines, raw, index, origin) => {
           if (index === 0) return outlines;
-          const yesterdayOverview = origin[0];
+          const monthEndOverview = origin[0];
 
-          const returnComparedWithYesterday =
-            (yesterdayOverview.close / raw.close) * 100 - 100;
+          // Adjusted close includes dividends (total return)
+          const returnComparedWithMonthEnd =
+            (monthEndOverview.adjustedClose / raw.adjustedClose) * 100 - 100;
 
           const rateOfRetrun = this.utils.twoDecimalPoint(
-            returnComparedWithYesterday,
+            returnComparedWithMonthEnd,
           );
 
           const quarterlyWeightedValues = {
@@ -121,7 +118,7 @@ export class AssetsService {
 
           const outline = {
             from: raw.date,
-            to: yesterdayOverview.date,
+            to: monthEndOverview.date,
             rateOfRetrun,
             adjustedReturn: this.utils.twoDecimalPoint(
               rateOfRetrun * weightedValue,

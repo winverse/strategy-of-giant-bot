@@ -1,6 +1,6 @@
-import path from 'path';
-import fs from 'fs';
-import { Config } from '@provider/config';
+import path from 'node:path';
+import fs from 'node:fs';
+import { Config } from '#provider/config';
 
 class WriteEnv {
   isDev = false;
@@ -37,7 +37,7 @@ class WriteEnv {
   }
 }
 
-(async function () {
+(async () => {
   try {
     const writeEnv = new WriteEnv();
 

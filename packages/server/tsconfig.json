@@ -11,7 +11,9 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": ".",
+    "types": [
+      "bun"
+    ],
     "incremental": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,20 +21,6 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
-    "paths": {
-      "@provider/*": [
-        "src/provider/*"
-      ],      
-      "@module/*": [
-        "src/module/*"
-      ],
-      "@common/*": [
-        "src/common/*"
-      ],
-      "@config/*": [
-        "config/*"
-      ]
-    }
+    "noFallthroughCasesInSwitch": false
   }
 }
