@@ -1,6 +1,7 @@
 // Verification scaffolding, loaded with `bun --preload` by launch.sh only.
-// The server reads its config by requiring packages/server/config/development.ts,
-// and Joi rejects that file while Telegram and database values are empty. This
+// The server reads its config by requiring #env/development (src/config/configuration.ts),
+// which resolves to packages/server/config/development.ts, and Joi rejects that
+// file while Telegram and database values are empty. This
 // plugin changes only what Bun hands to the server: it keeps the developer's
 // real values (the Equibles key), points the database at the throwaway Postgres,
 // and puts placeholders in Telegram. The file on disk is never written.

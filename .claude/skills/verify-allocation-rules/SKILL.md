@@ -65,7 +65,7 @@ A failure prints the rule (`V1:` … `D6:`), a JSON detail with `scores` and the
 
 ## Coverage record
 
-Covered files, with the git blob each was last confirmed against (`git hash-object <path>`). The files were uncommitted at the sync point, so the blob is the reliable marker.
+Covered files, with the git blob each was last confirmed against (`git hash-object <path>`). The blob stays the marker because the working tree can differ from HEAD.
 
 | Path | Blob confirmed | What is relied on |
 | --- | --- | --- |
@@ -77,7 +77,7 @@ Covered files, with the git blob each was last confirmed against (`git hash-obje
 | `packages/server/src/common/utils/number.ts` | `164f2a7abcba03b1c5ebcdc0b0e064931f6fac66` | `twoDecimalPoint` |
 | `packages/server/src/strategy/allocation/allocation.property.spec.ts` | `1f4352c6d45a5e219e49f20651449c4e0cf2b7e8` | the property itself |
 
-Sync point: confirmed 2026-11-10 on HEAD `564d097` + working tree, after the server was regrouped by domain (`report.service.ts` split into `allocation/vaa.ts`, `allocation/daa.ts` and `report/message.ts`; group `deffense` renamed `defense`). The spec and all 10 mutants were re-run, and the new functions were compared with the old `ReportService` on 10,000 generated score sets: same decisions and the same message text.
+Sync point: confirmed 2026-11-10 on HEAD `a4a78e8`, with the spec and all 10 mutants re-run. The covered files last changed in `131c01d`, which regrouped the server by domain (`report.service.ts` split into `allocation/vaa.ts`, `allocation/daa.ts` and `report/message.ts`; group `deffense` renamed `defense`). For that move, the new functions were compared with the old `ReportService` on 10,000 generated score sets: same decisions and the same message text.
 
 Check for drift:
 

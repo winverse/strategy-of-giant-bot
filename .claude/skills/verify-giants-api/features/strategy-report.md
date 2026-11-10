@@ -34,8 +34,8 @@ Preconditions:
 ## Gotchas
 
 - `strategy` is case-insensitive on this route too (`?strategy=vaa` works). A missing, empty or unknown `strategy` returns `400 BAD_REQUEST`.
-- A non-HTTP error in this route reaches the client as a plain-text `500`, and `server.log` shows `FST_ERR_BAD_STATUS_CODE ... invalid status code: undefined`. Read the stack above it for the real cause.
+- A non-HTTP error in this route reaches the client as a plain-text `500`, and `server.log` shows `FST_ERR_BAD_STATUS_CODE ... invalid status code: undefined`. Read the stack above it for the real cause. To reproduce on a throwaway instance, empty one cached row (`update "Tickers" set raw = '{}' where ticker = 'AGG'` in its Postgres) and request the VAA report: the log shows `TypeError ... base.adjustedClose`.
 - The DAA weight line rounds each offense slice to two decimals, so six picks print `16.67%` each (100.02% total). That is not a failure.
-- Momentum scores round each period's return to two decimals before weighting (×12 for one month). A recompute with the README formula and no rounding drifts by up to about 0.1 (observed 31.93 vs 31.97 for IEF). Compare to the app's rounding order when recomputing by hand.
+- Momentum scores weight each period's unrounded return and round only the weighted value (`src/strategy/momentum/score.ts`), so a recompute with the README formula matches to two decimals (IEF 31.93 on 2026-11-10). Evidence from before commit `564d097` rounded first and drifts by up to about 0.1 (IEF 31.97 then).
 - Ties: when two scores are equal, the report and `check-report.sh` keep the earlier ticker in the group's list order. If they disagree only on a tie, check whether the tie-break changed.
 - `날짜` is the server's local date, and `기준일` comes from the price data, so a run just after midnight or on the 1st of a month can shift both.
