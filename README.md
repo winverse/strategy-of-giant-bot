@@ -1,23 +1,26 @@
+**English** | [한국어](README.ko.md)
+
 # Motivation
 
-2020년 코로나, 2022년 우-러 전쟁을 통해서 자산분배의 중요성을 몸소 느낀뒤 강환국 작가의 [거인의 포트폴리오](http://www.kyobobook.co.kr/product/detailViewKor.laf?ejkGb=KOR&mallGb=KOR&barcode=9791190977432&orderClick=LEa&Kc=)라는 책을 읽고 영감을 받아 만들게 되었습니다.  
-책에서 소개하는 여러 전략중 [VAA](https://allocatesmartly.com/vigilant-asset-allocation-dr-wouter-keller-jw-keuning/)전략과 [DAA](https://allocatesmartly.com/ilya-kipnis-defensive-adaptive-asset-allocation/) 전략을 사용하고자 합니다.
+The COVID-19 crash in 2020 and the Russia–Ukraine war in 2022 showed me firsthand how much asset allocation matters. I built this after reading Kang Hwan-guk's book [The Giant's Portfolio (거인의 포트폴리오)](http://www.kyobobook.co.kr/product/detailViewKor.laf?ejkGb=KOR&mallGb=KOR&barcode=9791190977432&orderClick=LEa&Kc=).  
+Of the strategies introduced in the book, this project uses [VAA](https://allocatesmartly.com/vigilant-asset-allocation-dr-wouter-keller-jw-keuning/) and [DAA](https://indexswingtrader.blogspot.com/2018/07/announcing-defensive-asset-allocation.html).
 
 ## [VAA Strategy](https://allocatesmartly.com/vigilant-asset-allocation-dr-wouter-keller-jw-keuning/)
 
-- 공격자산: SPY(S&P500), VEA(선진국), VWO(개도국), AGG(미국 혼합채권)
-- 안전자산: SHY(미국단기채), IEF(중기채), LQD(회사채)
-- 4개의 공격자산중 모멘텀 스코어가 가장 높은 1개 자산을 산다
-- 4개의 공격 자산 중 하나라도 모멘텀스코어가 -면 안전자산으로
-- 안전 자산중 모멘텀 스코어가 가장 높은 자산을 산다.
+- Offensive assets: SPY (S&P 500), VEA (developed markets), VWO (emerging markets), AGG (US aggregate bonds)
+- Defensive assets: SHY (US short-term Treasuries), IEF (intermediate-term Treasuries), LQD (corporate bonds)
+- Buy the one offensive asset with the highest momentum score.
+- If any of the four offensive assets has a negative momentum score, switch to defensive assets.
+- Among the defensive assets, buy the one with the highest momentum score.
 
-## [DAA Strategy](https://allocatesmartly.com/ilya-kipnis-defensive-adaptive-asset-allocation/)
+## [DAA Strategy](https://indexswingtrader.blogspot.com/2018/07/announcing-defensive-asset-allocation.html)
 
-- 카나리아: BND(미국 혼합 채권), VWO(개도국)
-- 공격 자산: SPY(S&P500), IWM(러셀 2000), QQQ(나스닥), VGK(유럽), EWJ(일본), VWO(개도국), VNQ(리츠), GSG(원자재), GLD(금), TLT(미국 장기채), HYG(하이일드채권), LQD(회사채)
-- 안전 자산: SHY(미국단기채), IEF(미국중기채), LQD(회사채)
-- 12개 공격 자산, 모멘텀스코어가 제일 높은 6개의 자산을 삽니다.
-- 카나리아 자산으로 공격형 자산 비중 결정(2: 100%, 1: 50%, 0: 0%);
+- Canary assets: BND (US aggregate bonds), VWO (emerging markets)
+- Offensive assets: SPY (S&P 500), IWM (Russell 2000), QQQ (Nasdaq), VGK (Europe), EWJ (Japan), VWO (emerging markets), VNQ (REITs), GSG (commodities), GLD (gold), TLT (US long-term Treasuries), HYG (high-yield bonds), LQD (corporate bonds)
+- Defensive assets: SHY (US short-term Treasuries), IEF (US intermediate-term Treasuries), LQD (corporate bonds)
+- The canary assets set the offensive allocation, by how many have a positive momentum score (2: 100%, 1: 50%, 0: 0%).
+- Split the offensive allocation equally among the top offensive assets by momentum score (100%: top 6, 50%: top 3).
+- Put the rest in the defensive asset with the highest momentum score.
 
 ## [Momentum score](https://ycharts.com/glossary/terms/momentum_fractile)
 
@@ -25,6 +28,8 @@
 (12 * (p0 / p21 – 1)) + (4 * (p0 / p63 – 1)) + (2 * (p0 / p126 – 1)) + (p0 / p252 – 1)
 ```
 > Where p0 = the asset’s price at today’s close, p1 = the asset’s price at the close of the previous trading day and so on. 21, 63, 126 and 252 days correspond to 1, 3, 6 and 12 months.
+
+This project uses month-end, dividend-adjusted closing prices, and rebalances at the end of every month.
 
 # Run in Telegram
 
@@ -44,11 +49,11 @@
  - [Equibles](https://equibles.com): stock market data API
 
 # Milestone
-- [X] Ticker별 데이터 불러오기
-- [X] Ticker별 데이터 정리(outline)
-- [X] Outline 기반 모멘텀 스코어 계산하기
-- [X] 모멘텀 스코어 기반 텔레그램에 보낼 Report 만들기
+- [X] Fetch data for each ticker
+- [X] Organize data for each ticker (outline)
+- [X] Calculate momentum scores from the outline
+- [X] Build the Telegram report from momentum scores
 - [ ] Docker
-- [ ] AWS 배포
-- [ ] 프론트엔드 구상하기
+- [ ] Deploy to AWS
+- [ ] Plan the frontend
 
