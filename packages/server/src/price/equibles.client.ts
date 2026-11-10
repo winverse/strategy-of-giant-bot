@@ -16,10 +16,10 @@ export class EquiblesClient {
     });
 
     client.interceptors.request.use((config) => {
-      config.headers = {
-        ...(config.headers || {}),
-        Authorization: `Bearer ${this.config.get('financeApiKey')}`,
-      };
+      config.headers.set(
+        'Authorization',
+        `Bearer ${this.config.get('financeApiKey')}`,
+      );
       return config;
     });
     return client;

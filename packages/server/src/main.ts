@@ -20,13 +20,8 @@ async function bootstrap() {
     throw new Error('Missing PORT number in env');
   }
 
-  await fastify.listen(port, (err, address) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`Server is Running: ${address}`);
-  });
+  await fastify.listen(port);
+  console.log(`Server is Running: ${await fastify.getUrl()}`);
 }
 
 bootstrap();

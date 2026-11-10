@@ -1,10 +1,7 @@
-// https://github.com/yagop/node-telegram-bot-api/issues/540
-process.env.NTBA_FIX_319 = '1'; // don'remove
-
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '#config/config.service';
 import type { TelegramConfig } from '#config/config.types';
-import TelegramBot from 'node-telegram-bot-api';
+import { Api } from 'node-telegram-bot-api';
 
 export type TelegramRoom = keyof Omit<TelegramConfig, 'token'>;
 
@@ -14,7 +11,7 @@ export class TelegramService {
   sendMessage(roomName: TelegramRoom, message: string) {
     const { token, ...rest } = this.config.get('telegram');
 
-    const bot = new TelegramBot(token);
+    const api = new Api(token);
 
     const chatId = rest[roomName];
 
@@ -23,7 +20,7 @@ export class TelegramService {
     }
 
     setTimeout(() => {
-      bot.sendMessage(chatId, message);
+      api.sendMessage({ chat_id: chatId, text: message });
     }, 0);
   }
 }

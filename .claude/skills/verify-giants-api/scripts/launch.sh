@@ -24,7 +24,7 @@ for port in "$API_PORT" "$PG_PORT"; do
   lsof -iTCP:"$port" -sTCP:LISTEN -n -P >/dev/null 2>&1 && die "port $port is in use; pick others with VERIFY_API_PORT / VERIFY_PG_PORT"
 done
 [ -f "$SERVER/config/development.ts" ] || die "missing packages/server/config/development.ts (holds the Equibles key)"
-[ -d "$REPO/node_modules/.prisma/client" ] || die "Prisma client not generated; run: cd packages/server && bunx prisma generate"
+[ -d "$REPO/node_modules/.prisma/client" ] || die "Prisma client not generated; run: cd packages/server && bun run prisma:generate"
 
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 EVIDENCE="$BASE/evidence/$STAMP"
@@ -50,7 +50,7 @@ echo "PG_PID=$(head -1 "$RUN/pgdata/postmaster.pid")" >>"$RUN/state.env"
 createdb -h 127.0.0.1 -p "$PG_PORT" -U "$PG_USER" "$PG_DB"
 
 echo "launch: prisma db push"
-(cd "$SERVER" && DATABASE_URL="$DATABASE_URL" bunx prisma db push --skip-generate --accept-data-loss) >"$RUN/prisma.log" 2>&1 \
+(cd "$SERVER" && DATABASE_URL="$DATABASE_URL" bunx --bun prisma db push) >"$RUN/prisma.log" 2>&1 \
   || die "prisma db push failed; see $RUN/prisma.log (then run cleanup.sh)"
 
 echo "launch: server on 127.0.0.1:$API_PORT"

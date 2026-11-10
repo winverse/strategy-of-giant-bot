@@ -19,7 +19,7 @@ $S/launch.sh          # optional: VERIFY_API_PORT=5099 VERIFY_PG_PORT=55432 (def
 From an empty state this:
 
 1. Runs `initdb` for a throwaway Postgres in `.verify/giants-api/run/pgdata` on `127.0.0.1:$VERIFY_PG_PORT`, with trust auth for user `verify` and database `giants_verify`.
-2. Runs `bunx prisma db push` into it. That is the whole schema: one `Tickers` table, no seed data.
+2. Runs `bunx --bun prisma db push` into it. That is the whole schema: one `Tickers` table, no seed data. The database is new and empty, so the push needs no `--accept-data-loss`. Prisma 7 refuses that flag from an AI agent without the user's consent, so keep it out.
 3. Starts the real server, `bun src/main.ts` from `packages/server`, with `NODE_ENV=development` on `$VERIFY_API_PORT`.
 4. Waits until the log says `Server is Running` and HTTP answers. That takes about 5 s.
 
